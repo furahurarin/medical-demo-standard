@@ -4,6 +4,7 @@ import "./globals.css";
 import { Noto_Sans_JP } from "next/font/google";
 import Script from "next/script";
 import { ReactNode } from "react";
+import Link from "next/link";
 
 const font = Noto_Sans_JP({
   subsets: ["latin"], // Noto Sans JP はこれでOK（重量抑制）
@@ -12,6 +13,7 @@ const font = Noto_Sans_JP({
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const OGP_URL = "/ogp.png"; // ← PNGに変更（SNSでの表示安定のため）
+const LINE_URL = process.env.NEXT_PUBLIC_LINE_URL || "#";
 
 // JSON-LD 用 クリニック定数
 const CLINIC = {
@@ -31,9 +33,9 @@ const CLINIC = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "架空クリニック｜医療LPデモ",
+  title: "架空クリニック｜医療サイトデモ（Standard）",
   description:
-    "“病院/クリニックらしい”1ページLPのショーケース。電話・メール導線のみ、短納期で導入可能。",
+    "“病院/クリニックらしい”標準構成：〜5ページ土台＋お問い合わせフォーム＋お知らせ（簡易CMS）＋LINE予約導線を備えた多ページサイト。",
   // 検証URLでは noindex、本番では index
   robots:
     SITE_URL.includes("localhost") || SITE_URL.includes("127.0.0.1")
@@ -41,18 +43,18 @@ export const metadata: Metadata = {
       : { index: true, follow: true },
   openGraph: {
     type: "website",
-    title: "架空クリニック｜医療LPデモ",
+    title: "架空クリニック｜医療サイトデモ（Standard）",
     description:
-      "“病院/クリニックらしい”1ページLPのショーケース。電話・メール導線のみ、短納期で導入可能。",
+      "〜5ページ土台＋お問い合わせフォーム＋お知らせ（簡易CMS）＋LINE予約導線の標準構成。",
     url: "/",
     images: [{ url: OGP_URL, width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     images: [OGP_URL],
-    title: "架空クリニック｜医療LPデモ",
+    title: "架空クリニック｜医療サイトデモ（Standard）",
     description:
-      "“病院/クリニックらしい”1ページLPのショーケース。電話・メール導線のみ、短納期で導入可能。",
+      "〜5ページ土台＋お問い合わせフォーム＋お知らせ（簡易CMS）＋LINE予約導線の標準構成。",
   },
   alternates: { canonical: "/" },
   icons: { icon: "/icon.svg" },
@@ -69,8 +71,58 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ja">
       <body className={`${font.className} min-h-screen bg-white text-gray-900 antialiased`}>
-        {/* メインコンテンツ */}
+        {/* ===== Header（全ページ共通ナビ） ===== */}
+        <header
+          className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-200"
+          aria-label="サイト全体のヘッダー"
+        >
+          <div className="mx-auto max-w-6xl px-4 h-14 flex items-center justify-between">
+            <Link href="/" aria-label="トップへ" className="font-bold tracking-tight">
+              架空クリニック
+            </Link>
+            <nav aria-label="グローバルナビ" className="overflow-x-auto">
+              <ul className="flex items-center gap-3 text-sm text-gray-700">
+                <li><Link href="/services" className="px-2 py-1 rounded-lg hover:bg-gray-50">診療案内</Link></li>
+                <li><Link href="/doctor" className="px-2 py-1 rounded-lg hover:bg-gray-50">医師紹介</Link></li>
+                <li><Link href="/facilities" className="px-2 py-1 rounded-lg hover:bg-gray-50">院内設備</Link></li>
+                <li><Link href="/news" className="px-2 py-1 rounded-lg hover:bg-gray-50">お知らせ</Link></li>
+                <li><Link href="/access-hours" className="px-2 py-1 rounded-lg hover:bg-gray-50">アクセス/時間</Link></li>
+                <li><Link href="/contact" className="px-2 py-1 rounded-lg hover:bg-gray-50">お問い合わせ</Link></li>
+              </ul>
+            </nav>
+          </div>
+        </header>
+
+        {/* ===== メインコンテンツ ===== */}
         {children}
+
+        {/* ===== Footer ===== */}
+        <footer className="border-t border-gray-200">
+          <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-gray-600">
+            <p>&copy; {new Date().getFullYear()} 架空クリニック. All rights reserved.</p>
+          </div>
+        </footer>
+
+        {/* ===== SP固定CTA：電話 / LINE ===== */}
+        <div className="fixed bottom-0 inset-x-0 z-50 md:hidden border-t bg-white">
+          <div className="grid grid-cols-2">
+            <a
+              href="tel:0312345678"
+              className="flex items-center justify-center py-3 font-medium text-white bg-brand-700 hover:bg-brand-800"
+              data-umami-event="lp_phone_click_fixed"
+            >
+              電話（03-1234-5678）
+            </a>
+            <a
+              href={LINE_URL}
+              className="flex items-center justify-center py-3 font-medium hover:bg-gray-50"
+              data-umami-event="lp_line_click_fixed"
+            >
+              LINE予約
+            </a>
+          </div>
+          <div className="h-[env(safe-area-inset-bottom)]" />
+        </div>
 
         {/* ====== 計測（スクロール + クリックブリッジ） ====== */}
 
@@ -109,9 +161,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 var a = e.target && e.target.closest && e.target.closest('a[data-umami-event]');
                 if (!a || !window.gtag) return;
                 var ev = a.getAttribute('data-umami-event') || '';
-                // phone / email の両方を prefix マッチで転送（*_fixed も含む）
+                // phone / email / line を prefix マッチで転送（*_fixed も含む）
                 if (ev.indexOf('lp_phone_click') === 0) window.gtag('event', 'lp_phone_click');
                 if (ev.indexOf('lp_email_click') === 0) window.gtag('event', 'lp_email_click');
+                if (ev.indexOf('lp_line_click') === 0) window.gtag('event', 'lp_line_click');
               }, { capture: true, passive: true });
             })();
           `}

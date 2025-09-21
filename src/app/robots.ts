@@ -2,25 +2,18 @@
 import type { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const raw = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-  const site = raw.replace(/\/+$/, "");
-  const isLocal = site.includes("localhost") || site.includes("127.0.0.1");
+  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const isDev = /localhost|127\.0\.0\.1/i.test(base);
 
-  return isLocal
+  return isDev
     ? {
-        // ローカル環境：noindex（クローラ遮断）
-        rules: {
-          userAgent: "*",
-          disallow: "/",
-        },
+        rules: [{ userAgent: "*", disallow: "/" }],
+        sitemap: `${base}/sitemap.xml`,
+        host: base,
       }
     : {
-        // 本番環境：index許可 + sitemap/host 提供
-        rules: {
-          userAgent: "*",
-          allow: "/",
-        },
-        sitemap: `${site}/sitemap.xml`,
-        host: site,
+        rules: [{ userAgent: "*", allow: "/" }],
+        sitemap: `${base}/sitemap.xml`,
+        host: base,
       };
 }
