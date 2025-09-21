@@ -96,12 +96,59 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* ===== メインコンテンツ ===== */}
         {children}
 
-        {/* ===== Footer ===== */}
-        <footer className="border-t border-gray-200">
-          <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-gray-600">
-            <p>&copy; {new Date().getFullYear()} 架空クリニック. All rights reserved.</p>
-          </div>
-        </footer>
+       {/* ===== Footer ===== */}
+<footer className="border-top border-gray-200">
+  <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 md:grid-cols-3 text-sm">
+    {/* 1) クリニック情報 */}
+    <div>
+      <p className="font-semibold">架空クリニック</p>
+      <p className="mt-2 text-gray-700">
+        〒100-0005 東京都千代田区丸の内1-1-1
+      </p>
+      <p className="mt-1">
+        電話：<a href="tel:0312345678" className="underline" data-umami-event="lp_phone_click">03-1234-5678</a>
+      </p>
+      <p className="mt-1">
+        診療時間：<a href="/access-hours" className="underline">こちら</a>
+      </p>
+    </div>
+
+    {/* 2) お問い合わせ・予約 */}
+    <div>
+      <p className="font-semibold">お問い合わせ・ご予約</p>
+      <ul className="mt-2 space-y-1 text-gray-700">
+        <li>
+          <a href="/contact" className="underline" data-umami-event="lp_email_click">お問い合わせフォーム</a>
+        </li>
+        <li>
+          <a href={process.env.NEXT_PUBLIC_LINE_URL || "#"} className="underline" data-umami-event="lp_line_click">LINE予約</a>
+        </li>
+        <li>
+          <a href="/news" className="underline">お知らせ</a>
+        </li>
+      </ul>
+    </div>
+
+    {/* 3) 法務・各種情報 */}
+    <div>
+      <p className="font-semibold">サイト情報</p>
+      <ul className="mt-2 space-y-1 text-gray-700">
+        <li><a href="/services" className="underline">診療案内</a></li>
+        <li><a href="/access-hours" className="underline">アクセス / 診療時間</a></li>
+        <li><a href="/legal/privacy" className="underline">プライバシーポリシー</a></li>
+        <li><a href="/legal/tokusho" className="underline">特定商取引法に基づく表記</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div className="border-t border-gray-200">
+    <div className="mx-auto max-w-6xl px-4 py-6 text-xs text-gray-600 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+      <p>&copy; {new Date().getFullYear()} 架空クリニック</p>
+      <p className="text-gray-500">本サイトはデモです。記載の住所・連絡先は架空のものです。</p>
+    </div>
+  </div>
+</footer>
+
 
         {/* ===== SP固定CTA：電話 / LINE ===== */}
         <div className="fixed bottom-0 inset-x-0 z-50 md:hidden border-t bg-white">
