@@ -7,8 +7,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-export default function ContactPage({ searchParams }: { searchParams?: { ok?: string } }) {
-  const ok = searchParams?.ok === "1";
+// Next.js 15 では searchParams が Promise になったため async にする
+type SP = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function ContactPage({ searchParams }: { searchParams?: SP }) {
+  const sp = (await searchParams) ?? {};
+  const okParam = sp.ok;
+  const ok = Array.isArray(okParam) ? okParam.includes("1") : okParam === "1";
   const lineUrl = process.env.NEXT_PUBLIC_LINE_URL || "#";
 
   return (
@@ -55,7 +60,7 @@ export default function ContactPage({ searchParams }: { searchParams?: { ok?: st
           <textarea name="message" rows={6} required className="mt-1 w-full rounded-2xl border px-3 py-2" />
         </div>
 
-        {/* ▼ 同意チェック（法務リンクは後で追加するプライバシーポリシーへ） */}
+        {/* 同意チェック */}
         <div className="text-sm text-gray-600">
           <label className="inline-flex items-start gap-2">
             <input type="checkbox" name="consent" required className="mt-1" />

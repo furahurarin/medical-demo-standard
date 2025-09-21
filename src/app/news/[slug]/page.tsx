@@ -4,11 +4,16 @@ import Link from "next/link";
 import { getNewsBySlug } from "@/lib/news";
 import { notFound } from "next/navigation";
 
-type Props = { params: { slug: string } };
+// Next.js 15: params is Promise
+type Params = Promise<{ slug: string }>;
 
-export function generateMetadata({ params }: Props): Metadata {
-  const item = getNewsBySlug(params.slug);
+export async function generateMetadata(
+  { params }: { params: Params }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const item = getNewsBySlug(slug);
   if (!item) return { title: "お知らせ｜架空クリニック" };
+
   return {
     title: `${item.title}｜お知らせ｜架空クリニック`,
     description: item.body.slice(0, 80),
@@ -16,8 +21,11 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function NewsDetail({ params }: Props) {
-  const item = getNewsBySlug(params.slug);
+export default async function NewsDetail(
+  { params }: { params: Params }
+) {
+  const { slug } = await params;
+  const item = getNewsBySlug(slug);
   if (!item) return notFound();
 
   return (

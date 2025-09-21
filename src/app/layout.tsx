@@ -97,19 +97,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {children}
 
        {/* ===== Footer ===== */}
-<footer className="border-top border-gray-200">
+<footer className="border-t border-gray-200">
   <div className="mx-auto max-w-6xl px-4 py-10 grid gap-8 md:grid-cols-3 text-sm">
     {/* 1) クリニック情報 */}
     <div>
       <p className="font-semibold">架空クリニック</p>
-      <p className="mt-2 text-gray-700">
-        〒100-0005 東京都千代田区丸の内1-1-1
-      </p>
+      <p className="mt-2 text-gray-700">〒100-0005 東京都千代田区丸の内1-1-1</p>
       <p className="mt-1">
         電話：<a href="tel:0312345678" className="underline" data-umami-event="lp_phone_click">03-1234-5678</a>
       </p>
       <p className="mt-1">
-        診療時間：<a href="/access-hours" className="underline">こちら</a>
+        診療時間：<Link href="/access-hours" className="underline">こちら</Link>
       </p>
     </div>
 
@@ -118,13 +116,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <p className="font-semibold">お問い合わせ・ご予約</p>
       <ul className="mt-2 space-y-1 text-gray-700">
         <li>
-          <a href="/contact" className="underline" data-umami-event="lp_email_click">お問い合わせフォーム</a>
+          <Link href="/contact" className="underline" data-umami-event="lp_email_click">お問い合わせフォーム</Link>
         </li>
         <li>
           <a href={process.env.NEXT_PUBLIC_LINE_URL || "#"} className="underline" data-umami-event="lp_line_click">LINE予約</a>
         </li>
         <li>
-          <a href="/news" className="underline">お知らせ</a>
+          <Link href="/news" className="underline">お知らせ</Link>
         </li>
       </ul>
     </div>
@@ -133,10 +131,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <div>
       <p className="font-semibold">サイト情報</p>
       <ul className="mt-2 space-y-1 text-gray-700">
-        <li><a href="/services" className="underline">診療案内</a></li>
-        <li><a href="/access-hours" className="underline">アクセス / 診療時間</a></li>
-        <li><a href="/legal/privacy" className="underline">プライバシーポリシー</a></li>
-        <li><a href="/legal/tokusho" className="underline">特定商取引法に基づく表記</a></li>
+        <li><Link href="/services" className="underline">診療案内</Link></li>
+        <li><Link href="/access-hours" className="underline">アクセス / 診療時間</Link></li>
+        <li><Link href="/legal/privacy" className="underline">プライバシーポリシー</Link></li>
+        <li><Link href="/legal/tokusho" className="underline">特定商取引法に基づく表記</Link></li>
       </ul>
     </div>
   </div>
@@ -148,6 +146,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </div>
   </div>
 </footer>
+
 
 
         {/* ===== SP固定CTA：電話 / LINE ===== */}
