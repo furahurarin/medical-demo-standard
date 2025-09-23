@@ -22,11 +22,11 @@ const GMAPS_LINK = `https://www.google.com/maps?q=${MAP_QUERY}`;
 
 export default function AccessPage() {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10 space-y-12">
-      {/* ヘッダー */}
-      <header className="space-y-3">
-        <h1 className="text-3xl font-bold">アクセス・診療時間</h1>
-        <p className="text-gray-700">
+    <main className="mx-auto max-w-6xl px-4 py-10 space-y-12">
+      {/* ページヘッダー */}
+      <header className="hero-soft-bg rounded-2xl ring-1 ring-gray-100 px-6 py-10 md:px-8 md:py-12 space-y-3">
+        <h1 className="text-3xl md:text-4xl font-bold motion-fadein">アクセス・診療時間</h1>
+        <p className="text-gray-700 motion-fadein">
           {CLINIC_NAME} の所在地と診療時間のご案内です。ご不明点は{" "}
           <Link href="/contact" className="underline hover:no-underline">
             お問い合わせ
@@ -36,14 +36,15 @@ export default function AccessPage() {
       </header>
 
       {/* 住所・地図 */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">所在地・アクセス</h2>
+      <section className="space-y-6">
+        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">所在地・アクセス</h2>
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-2">
+          {/* 住所ブロック */}
+          <div className="card p-5 space-y-3 motion-fadein">
             <div className="text-sm text-gray-700">
               住所：{ADDRESS}
               <br />
-              電話：
+              電話：{" "}
               <a href={`tel:${TEL_LINK}`} className="underline hover:no-underline">
                 {TEL_DISPLAY}
               </a>
@@ -51,7 +52,7 @@ export default function AccessPage() {
             <div className="text-sm text-gray-700">
               最寄駅：JR「東京」駅 丸の内北口から徒歩約5分（目安）
             </div>
-            <div>
+            <div className="pt-1">
               <a
                 href={GMAPS_LINK}
                 target="_blank"
@@ -63,13 +64,14 @@ export default function AccessPage() {
             </div>
           </div>
 
-          <div className="rounded-lg overflow-hidden border">
+          {/* 地図埋め込み */}
+          <div className="photo-wrap overflow-hidden border motion-fadein">
             <iframe
               title={`${CLINIC_NAME} の地図`}
               src={GMAPS_EMBED}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="w-full h-72"
+              className="w-full h-72 md:h-80"
             />
           </div>
         </div>
@@ -77,9 +79,9 @@ export default function AccessPage() {
 
       {/* 診療時間 */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-semibold">診療時間</h2>
-        <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full border-collapse text-sm">
+        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">診療時間</h2>
+        <div className="card p-0 overflow-x-auto motion-fadein">
+          <table className="w-full border-collapse text-sm min-w-[560px]">
             <thead>
               <tr className="bg-gray-50">
                 <th className="border px-3 py-2 text-left">曜日</th>
@@ -106,7 +108,7 @@ export default function AccessPage() {
             </tbody>
           </table>
         </div>
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-700 motion-fadein">
           受付は診療終了の15分前まで。学会等により変更となる場合があります。
           最新情報は{" "}
           <Link href="/news" className="underline hover:no-underline">
@@ -117,25 +119,25 @@ export default function AccessPage() {
       </section>
 
       {/* 最後の行動導線 */}
-      <section className="space-y-3">
-        <h2 className="text-2xl font-semibold">関連ページ</h2>
-        <ul className="list-disc pl-6 space-y-1">
-          <li>
-            <Link href="/services" className="hover:underline">
-              診療案内を見る
-            </Link>
-          </li>
-          <li>
-            <Link href="/facility" className="hover:underline">
-              設備・院内紹介を確認する
-            </Link>
-          </li>
-          <li>
-            <Link href="/contact" className="hover:underline">
-              お問い合わせ（フォーム）
-            </Link>
-          </li>
-        </ul>
+      <section className="space-y-4">
+        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">関連ページ</h2>
+        <div className="flex flex-wrap gap-3 motion-fadein">
+          <Link
+            href="/services"
+            className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+          >
+            診療案内を見る
+          </Link>
+          <Link
+            href="/facility"
+            className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+          >
+            設備・院内紹介を確認する
+          </Link>
+          <Link href="/contact" className="btn-primary">
+            お問い合わせ（フォーム）
+          </Link>
+        </div>
       </section>
     </main>
   );

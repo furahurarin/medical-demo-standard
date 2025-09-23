@@ -40,9 +40,28 @@ export default function FormClient({ telDisplay, telLink }: Props) {
           ? (e.currentTarget as HTMLInputElement).checked
           : e.currentTarget.value;
 
-      // 型安全に更新（型アサーションは FormState へのみ）
-      setState((prev) => ({ ...prev, [key]: value } as FormState));
+      // 電話番号は入力時に半角数字とハイフン以外を除去（視認性を損ねない軽い整形）
+      if (key === "tel" && typeof value === "string") {
+        const digits = value.replace(/[^\d-]/g, "");
+        setState((prev) => ({ ...prev, [key]: digits } as FormState));
+      } else {
+        setState((prev) => ({ ...prev, [key]: value } as FormState));
+      }
     };
+
+  // 日本の一般的な電話番号の簡易フォーマッタ（03/06は2-4-4、携帯や11桁は3-4-4、その他は3-3-4 に近づける）
+  const formatPhoneJP = (raw: string) => {
+    const d = raw.replace(/\D/g, "");
+    if (d.length === 0) return "";
+    if (/^(03|06)\d{8}$/.test(d)) return `${d.slice(0, 2)}-${d.slice(2, 6)}-${d.slice(6)}`;
+    if (d.length === 11) return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+    if (d.length === 10) return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}`;
+    return raw; // 桁数が揃わない途中入力はそのまま
+  };
+
+  const onBlurTel = () => {
+    setState((prev) => ({ ...prev, tel: formatPhoneJP(prev.tel) }));
+  };
 
   const validate = () => {
     if (!state.name.trim()) return "お名前を入力してください。";
@@ -86,7 +105,8 @@ export default function FormClient({ telDisplay, telLink }: Props) {
         website: "",
       });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "送信に失敗しました。時間をおいて再度お試しください。";
+      const msg =
+        err instanceof Error ? err.message : "送信に失敗しました。時間をおいて再度お試しください。";
       setResult({ ok: false, msg });
     } finally {
       setSubmitting(false);
@@ -94,9 +114,9 @@ export default function FormClient({ telDisplay, telLink }: Props) {
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6" noValidate>
+    <form onSubmit={onSubmit} className="space-y-6 motion-fadein" noValidate>
       {/* honeypot（画面に見せない） */}
-      <div aria-hidden className="hidden">
+      <div aria-hidden className="sr-only">
         <label>
           Webサイト
           <input
@@ -112,69 +132,85 @@ export default function FormClient({ telDisplay, telLink }: Props) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <label className="block text-sm font-medium">お名前（必須）</label>
+          <label htmlFor="name" className="block text-sm font-medium">お名前（必須）</label>
           <input
+            id="name"
             type="text"
             name="name"
             value={state.name}
             onChange={onChange("name")}
+            autoComplete="name"
+            aria-required="true"
             required
           />
         </div>
         <div className="space-y-1">
-          <label className="block text-sm font-medium">メールアドレス（必須）</label>
+          <label htmlFor="email" className="block text-sm font-medium">メールアドレス（必須）</label>
           <input
+            id="email"
             type="email"
             name="email"
             value={state.email}
             onChange={onChange("email")}
             inputMode="email"
+            autoComplete="email"
+            aria-required="true"
             required
           />
         </div>
       </div>
 
       <div className="space-y-1">
-        <label className="block text-sm font-medium">電話番号（任意）</label>
+        <label htmlFor="tel" className="block text-sm font-medium">電話番号（任意）</label>
         <input
+          id="tel"
           type="tel"
           name="tel"
           value={state.tel}
           onChange={onChange("tel")}
+          onBlur={onBlurTel}
           inputMode="tel"
-          placeholder="0312345678 など"
+          autoComplete="tel"
+          placeholder="03-1234-5678 / 090-1234-5678 など"
+          pattern="[\d\-]*"
         />
       </div>
 
       <div className="space-y-1">
-        <label className="block text-sm font-medium">件名（必須）</label>
+        <label htmlFor="subject" className="block text-sm font-medium">件名（必須）</label>
         <input
+          id="subject"
           type="text"
           name="subject"
           value={state.subject}
           onChange={onChange("subject")}
+          autoComplete="off"
+          aria-required="true"
           required
         />
       </div>
 
       <div className="space-y-1">
-        <label className="block text-sm font-medium">お問い合わせ内容（必須）</label>
+        <label htmlFor="message" className="block text-sm font-medium">お問い合わせ内容（必須）</label>
         <textarea
+          id="message"
           name="message"
           value={state.message}
           onChange={onChange("message")}
           rows={8}
+          aria-required="true"
           required
         />
       </div>
 
-      <div className="space-x-2">
+      <div className="flex items-start gap-2">
         <input
           id="agree"
           type="checkbox"
           checked={state.agree}
           onChange={onChange("agree")}
           required
+          aria-required="true"
         />
         <label htmlFor="agree" className="text-sm">
           <Link href="/legal/privacy" className="underline hover:no-underline">
@@ -188,7 +224,7 @@ export default function FormClient({ telDisplay, telLink }: Props) {
         <button
           type="submit"
           disabled={submitting}
-          className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50 disabled:opacity-50"
+          className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? "送信中..." : "送信する"}
         </button>
@@ -201,7 +237,11 @@ export default function FormClient({ telDisplay, telLink }: Props) {
       </div>
 
       {result && (
-        <p className={`text-sm ${result.ok ? "text-green-600" : "text-red-600"}`}>
+        <p
+          role="status"
+          aria-live="polite"
+          className={`text-sm ${result.ok ? "text-green-600" : "text-red-600"}`}
+        >
           {result.msg}
         </p>
       )}

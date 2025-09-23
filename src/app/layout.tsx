@@ -1,7 +1,11 @@
 // src/app/layout.tsx
+'use client';
+
 import "./globals.css";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import JsonLdLocalBusiness from "@/components/seo/JsonLdLocalBusiness";
 
 // ★ 実案件化で差し替えやすいよう最低限のNAPをここに集約
@@ -12,6 +16,8 @@ const TEL_LINK = "0312345678";
 const LINE_URL = "https://line.me/"; // ※運用時に公式アカウントURLへ差し替え
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+
   return (
     <html lang="ja">
       <body className="min-h-screen bg-white text-gray-900">
@@ -19,7 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <a href="#main" className="skip-link">本文へスキップ</a>
 
         {/* Header */}
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b">
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
           <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
             <div className="flex items-center gap-3">
               <Link href="/" className="font-semibold text-lg hover:opacity-80">
@@ -39,7 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   </a>
                 </li>
                 <li>
-                  <Link href="/contact" className="inline-flex items-center gap-2 rounded-lg px-3 py-2 border hover:bg-gray-50">
+                  <Link href="/contact" className="btn-primary">
                     お問い合わせ
                   </Link>
                 </li>
@@ -55,11 +61,22 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        {/* Main */}
-        <main id="main">{children}</main>
+        {/* Main with page transition */}
+        <AnimatePresence mode="wait">
+          <motion.main
+            id="main"
+            key={pathname}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.24, ease: "easeOut" }}
+          >
+            {children}
+          </motion.main>
+        </AnimatePresence>
 
         {/* Footer */}
-        <footer className="mt-16 border-t">
+        <footer className="mt-16 border-t border-gray-100">
           <div className="mx-auto max-w-6xl px-4 py-10 grid gap-6 sm:grid-cols-3">
             <div>
               <div className="font-semibold">{CLINIC_NAME}</div>
@@ -87,10 +104,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <div>
               <div className="font-semibold">ご予約・お問い合わせ</div>
               <div className="mt-2 flex flex-col gap-2 text-sm">
-                <a href={LINE_URL} target="_blank" rel="noopener" className="inline-flex w-fit rounded-lg px-3 py-2 border hover:bg-gray-50">
+                <a
+                  href={LINE_URL}
+                  target="_blank"
+                  rel="noopener"
+                  className="inline-flex w-fit rounded-lg px-3 py-2 border hover:bg-gray-50"
+                >
                   LINEで予約
                 </a>
-                <Link href="/contact" className="inline-flex w-fit rounded-lg px-3 py-2 border hover:bg-gray-50">
+                <Link href="/contact" className="btn-primary w-fit">
                   フォームで相談する
                 </Link>
               </div>

@@ -1,6 +1,22 @@
 @import "tailwindcss";
 
+/* =========================
+   Design Tokens（Tailwind v4 @theme inline）
+   ※ フォントは据え置き。色味だけ一段深めにして質感を上げます。
+   ========================= */
+@theme inline {
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-600: #3346d3; /* 深めの藍 */
+  --color-brand-700: #2739b8;
+  --color-brand-800: #1f2f96;
+}
+
 /* ここから下は素のCSS（Tailwind v4でそのまま効く書き方） */
+
+/* =========================
+   ベース
+   ========================= */
 
 /* スクロールとベース色 */
 html { scroll-behavior: smooth; }
@@ -15,21 +31,6 @@ img, svg, video, canvas, audio, iframe, embed, object {
 /* タップ時のハイライト除去（モバイル） */
 * { -webkit-tap-highlight-color: transparent; }
 
-/* アクセシブルなフォーカスリング */
-:focus { outline: 2px solid #111827; outline-offset: 2px; }
-@supports selector(:focus-visible) {
-  :focus:not(:focus-visible) { outline: none; }
-}
-
-/* Skip link（<a class="skip-link">本文へスキップ</a> を使う想定） */
-.skip-link {
-  position: absolute; top: -40px; left: 0;
-  background: #fff; padding: 8px 16px;
-  border: 1px solid #e5e7eb; border-radius: 8px; z-index: 100;
-  color: inherit; text-decoration: none;
-}
-.skip-link:focus { top: 0; }
-
 /* デフォルトはリンク色を継承（必要な箇所だけ className で下線付与） */
 a { color: inherit; text-decoration: none; }
 
@@ -41,7 +42,33 @@ h3 { font-size: 1.25rem; line-height: 1.40; font-weight: 700; }
 /* テーブル（セルのボーダーはページ側で付ける方針） */
 table { width: 100%; border-collapse: collapse; }
 
-/* フォーム要素（素のCSSで共通スタイル） */
+/* =========================
+   フォーカス & Skip link（A11y）
+   ========================= */
+
+/* アクセシブルなフォーカスリング（:focus-visible を優先し、未対応環境は :focus を代替） */
+:focus { outline: 2px solid var(--color-brand-700); outline-offset: 2px; }
+@supports selector(:focus-visible) {
+  :focus:not(:focus-visible) { outline: none; }
+  :focus-visible {
+    outline: 3px solid var(--color-brand-600);
+    outline-offset: 3px;
+    border-radius: .5rem;
+  }
+}
+
+/* Skip link（<a class="skip-link">本文へスキップ</a> を使う想定） */
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: #fff; padding: 8px 16px;
+  border: 1px solid #e5e7eb; border-radius: 8px; z-index: 100;
+  color: inherit; text-decoration: none;
+}
+.skip-link:focus, .skip-link:focus-visible { top: 0; }
+
+/* =========================
+   フォーム（素のCSSで共通スタイル）
+   ========================= */
 input, textarea, select {
   width: 100%;
   display: block;
@@ -49,12 +76,18 @@ input, textarea, select {
   border-radius: 0.5rem;            /* rounded-lg */
   padding: 0.5rem 0.75rem;          /* px-3 py-2 */
   font: inherit; line-height: 1.5; color: inherit; background-color: #fff;
+  transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 input:focus, textarea:focus, select:focus {
-  outline: 2px solid #111827; outline-offset: 2px; border-color: #111827;
+  outline: 2px solid var(--color-brand-700);
+  outline-offset: 2px;
+  border-color: var(--color-brand-700);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand-600) 30%, transparent);
 }
 
-/* ボタン（アンカーをボタン化する場合はHTML側でクラスを付与） */
+/* =========================
+   ボタン（ベース）＋ 高級感ユーティリティ
+   ========================= */
 button {
   cursor: pointer;
   border: 1px solid #d1d5db;        /* gray-300 */
@@ -62,8 +95,77 @@ button {
   padding: 0.5rem 1rem;             /* px-4 py-2 */
   background-color: #f3f4f6;        /* gray-100 */
   color: inherit;
+  transition: background-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 button:hover { background-color: #e5e7eb; } /* gray-200 */
 button:disabled, input:disabled, select:disabled, textarea:disabled {
   opacity: 0.5; cursor: not-allowed;
+}
+
+/* 主要CTA（リンクにも使えるようクラス化） */
+.btn-primary {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0.75rem 1.25rem; /* px-5 py-3 */
+  border-radius: 0.75rem;   /* rounded-xl */
+  font-weight: 500; color: #fff;
+  background: var(--color-brand-700);
+  box-shadow: 0 8px 18px rgba(39,57,184,.18);
+  transition: transform .18s ease, box-shadow .18s ease, background-color .2s ease, filter .2s ease;
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  background: var(--color-brand-800);
+  filter: saturate(1.02);
+}
+.btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 6px 14px rgba(39,57,184,.18);
+}
+
+/* =========================
+   カード/影/写真オーバーレイ（質感アップ）
+   ========================= */
+.shadow-elev-1 { box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+.shadow-elev-2 { box-shadow: 0 10px 28px rgba(0,0,0,.10); }
+
+.card {
+  border-radius: 1rem;               /* rounded-2xl */
+  background: rgba(255,255,255,.95);
+  border: 1px solid #f3f4f6;         /* ring-gray-100 相当 */
+  box-shadow: 0 8px 28px rgba(20, 30, 60, .08);
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(20, 30, 60, .12);
+  filter: saturate(1.02);
+}
+
+/* 写真に淡い色ベールを掛けてトーン統一 */
+.photo-wrap { position: relative; overflow: hidden; border-radius: 1rem; }
+.photo-wrap::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom right, rgba(31,47,150,.06), rgba(0,0,0,.04));
+  pointer-events: none;
+}
+
+/* =========================
+   モーション（OSの「動きを減らす」を尊重）
+   ========================= */
+.motion-fadein { opacity: 0; transform: translateY(8px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .motion-fadein {
+    animation: kf-fadeup .5s ease forwards;
+  }
+  @keyframes kf-fadeup {
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+/* ページ先頭ヒーローなどに使う、控えめなグラデ背景 */
+.hero-soft-bg {
+  background:
+    radial-gradient(1200px 600px at 10% 0%, rgba(51,70,211,.08), transparent 60%),
+    radial-gradient(1200px 800px at 90% 10%, rgba(31,47,150,.06), transparent 55%);
 }
