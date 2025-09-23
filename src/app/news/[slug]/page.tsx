@@ -11,11 +11,11 @@ export function generateStaticParams() {
   return getAll().map((n) => ({ slug: n.slug }));
 }
 
-/** 記事ごとに metadata を出力 */
+/** 記事ごとに metadata を出力（params は Promise で受ける） */
 export async function generateMetadata(
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
-  const { slug } = params;
+  const { slug } = await params;
   const item = getBySlug(slug);
   if (!item) {
     return { title: "お知らせ｜架空クリニック" };
@@ -32,12 +32,14 @@ export async function generateMetadata(
   };
 }
 
-export default function NewsDetailPage({ params }: { params: { slug: string } }) {
-  const { slug } = params;
+/** 詳細ページ本体（params は Promise で受ける） */
+export default async function NewsDetailPage(
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
   const item = getBySlug(slug);
 
   if (!item) {
-    // Next.js の notFound を呼ぶことで共通の not-found.tsx にフォールバック
     notFound();
   }
 
