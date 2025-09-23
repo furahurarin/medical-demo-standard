@@ -1,37 +1,66 @@
 // src/components/seo/JsonLdLocalBusiness.tsx
-"use client";
-
 type Props = {
   name: string;
-  url: string;
-  telephone: string;
-  address: {
-    postalCode?: string;
-    addressRegion?: string; // 都道府県
-    addressLocality?: string; // 市区町村
-    streetAddress?: string; // 丁目番地
-  };
+  url?: string;
+  telephone?: string;
+  streetAddress?: string;
+  addressLocality?: string;
+  addressRegion?: string;
+  postalCode?: string;
+  addressCountry?: string; // 例: "JP"
+  openingHours?: string[]; // 例: ["Mo,Tu,We,Fr 09:00-12:30", ...]
+  latitude?: number;
+  longitude?: number;
 };
 
-export default function JsonLdLocalBusiness({ name, url, telephone, address }: Props) {
-  const json = {
+export default function JsonLdLocalBusiness({
+  name,
+  url,
+  telephone,
+  streetAddress,
+  addressLocality,
+  addressRegion,
+  postalCode,
+  addressCountry = "JP",
+  openingHours = [],
+  latitude,
+  longitude,
+}: Props) {
+  const data: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "MedicalClinic",
     name,
-    url,
-    telephone,
-    address: {
-      "@type": "PostalAddress",
-      postalCode: address.postalCode ?? "",
-      addressRegion: address.addressRegion ?? "",
-      addressLocality: address.addressLocality ?? "",
-      streetAddress: address.streetAddress ?? "",
-    },
   };
+
+  if (url) data.url = url;
+  if (telephone) data.telephone = telephone;
+
+  if (
+    streetAddress ||
+    addressLocality ||
+    addressRegion ||
+    postalCode ||
+    addressCountry
+  ) {
+    data.address = {
+      "@type": "PostalAddress",
+      ...(streetAddress ? { streetAddress } : {}),
+      ...(addressLocality ? { addressLocality } : {}),
+      ...(addressRegion ? { addressRegion } : {}),
+      ...(postalCode ? { postalCode } : {}),
+      ...(addressCountry ? { addressCountry } : {}),
+    };
+  }
+
+  if (openingHours.length) data.openingHours = openingHours;
+  if (latitude && longitude) {
+    data.geo = { "@type": "GeoCoordinates", latitude, longitude };
+  }
+
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(json) }}
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );
 }

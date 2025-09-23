@@ -1,49 +1,40 @@
 // src/app/news/page.tsx
-import Link from "next/link";
 import type { Metadata } from "next";
-import { latestNews } from "@/lib/news";
+import Link from "next/link";
+import { getAll } from "@/lib/news";
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "お知らせ一覧｜架空クリニック",
-  description: "最新のお知らせの一覧ページです。",
+  description: "架空クリニックのお知らせ一覧。休診情報やご案内、最新情報を掲載します。",
   alternates: { canonical: "/news" },
 };
 
 export default function NewsIndexPage() {
-  // 日付の新しい順に並べ替え（ISO想定）
-  const items = [...latestNews].sort(
-    (a, b) => +new Date(b.date) - +new Date(a.date)
-  );
-
+  const items = getAll();
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="text-2xl font-bold">お知らせ</h1>
+    <main className="mx-auto max-w-5xl px-4 py-10 space-y-8">
+      <header className="space-y-3">
+        <h1 className="text-3xl font-bold">お知らせ</h1>
+        <p className="text-gray-700">休診情報・ご案内など、最新のお知らせを掲載しています。</p>
+      </header>
 
       {items.length === 0 ? (
-        <p className="mt-6 text-gray-600">現在、掲載中のお知らせはありません。</p>
+        <p className="text-gray-700">現在、お知らせはありません。</p>
       ) : (
-        <ul className="mt-6 space-y-3">
+        <ul className="divide-y rounded-lg border">
           {items.map((n) => (
-            <li key={n.slug}>
-              <Link
-                href={`/news/${n.slug}`}
-                className="block rounded-xl border border-gray-200 p-4 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
-              >
-                <div className="text-sm text-gray-500">
-                  {new Date(n.date).toLocaleDateString("ja-JP")}
-                </div>
-                <div className="mt-1 font-medium">{n.title}</div>
+            <li key={n.slug} className="p-4 flex flex-col gap-1">
+              <time className="text-xs text-gray-500">{n.date}</time>
+              <Link href={`/news/${n.slug}`} className="font-semibold hover:underline">
+                {n.title}
               </Link>
+              {n.summary ? <p className="text-sm text-gray-700">{n.summary}</p> : null}
             </li>
           ))}
         </ul>
       )}
-
-      <div className="mt-10">
-        <Link href="/" className="text-brand-700 hover:underline">
-          トップへ戻る
-        </Link>
-      </div>
     </main>
   );
 }

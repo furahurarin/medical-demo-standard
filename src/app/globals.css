@@ -1,154 +1,69 @@
-/* src/app/globals.css */
 @import "tailwindcss";
 
-/* --- Design Tokens (Tailwind v4 @theme inline) --- */
-@theme inline {
-  --color-brand-50:  #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-600: #2563eb;
-  --color-brand-700: #1d4ed8;
-  --color-brand-800: #1e40af;
-}
+/* ここから下は素のCSS（Tailwind v4でそのまま効く書き方） */
 
-:root {
-  --header-height: 64px;
-  --cta-h: 6rem; /* SP固定CTAの高さ（重なり防止用の既定値） */
-}
-
+/* スクロールとベース色 */
 html { scroll-behavior: smooth; }
-body { @apply bg-white text-gray-900; }
+body { background-color: #ffffff; color: #111827; }
 
-/* =========================
-   Anchor offset
-   ========================= */
-.section { scroll-margin-top: var(--header-height); }
-
-/* =========================
-   Buttons & Cards
-   ========================= */
-.btn {
-  @apply inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-medium transition
-         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-700;
-}
-.btn-primary { @apply bg-brand-700 text-white hover:bg-brand-800; }
-.btn-outline { @apply border border-brand-700 text-brand-700 hover:bg-brand-700 hover:text-white; }
-/* ヒーロー等の暗い背景で使う白縁ボタン */
-.btn-ghost-light { @apply border border-white/70 text-white hover:bg-white hover:text-gray-900; }
-
-.card { @apply rounded-2xl border border-gray-200 bg-white shadow-sm; }
-
-/* =========================
-   FAQ block
-   ========================= */
-details.faq { @apply border border-gray-200 rounded-xl bg-white p-4; }
-details.faq + details.faq { @apply mt-3; }
-details.faq > summary { @apply cursor-pointer list-none font-medium flex items-center gap-2; }
-details.faq > summary::-webkit-details-marker { display: none; }
-details.faq[open] { @apply border-brand-100 bg-brand-50; }
-/* details caret */
-details.faq > summary::after {
-  content: "▾";
-  margin-left: auto;
-  transition: transform 160ms ease;
-}
-details.faq[open] > summary::after { transform: rotate(180deg); }
-
-/* =========================
-   Lean table
-   ========================= */
-.table-clean { @apply w-full text-sm border border-gray-200 rounded-xl overflow-hidden; }
-.table-clean thead th { @apply bg-gray-50 text-left font-medium px-3 py-2; }
-.table-clean tbody td { @apply px-3 py-2 border-t border-gray-100; }
-
-/* =========================
-   In-page nav (アクセシビリティ強化)
-   ========================= */
-/* 現在地リンク（aria-current="page"）を視覚強調 */
-header nav a[aria-current="page"] {
-  color: #1d4ed8; /* brand-700 相当 */
-  font-weight: 600;
-  text-underline-offset: 3px;
-}
-header nav a[aria-current="page"]:not(:hover) {
-  text-decoration: underline; /* hover時は既存ホバーが優先 */
-}
-/* nav フォーカス可視（aria-label値に依存しない） */
-header nav a:focus-visible {
-  outline: 2px solid var(--color-brand-700);
-  outline-offset: 2px;
-  border-radius: 8px;
+/* メディア要素のはみ出し防止 */
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  max-width: 100%;
 }
 
-/* =========================
-   Hero helpers（必要に応じて使用）
-   ========================= */
-.hero-pattern {
-  background-image: radial-gradient(rgba(29,78,216,.08) 1px, transparent 1px);
-  background-size: 18px 18px;
-}
-/* フルブリード用の補助クラス（今後の再利用に備えて定義） */
-.hero-full { position: relative; min-height: clamp(480px, 75vh, 720px); isolation: isolate; }
-.hero-full .hero-bg { position: absolute; inset: 0; }
-.hero-full .hero-scrim {
-  position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(8,14,40,.78), rgba(8,14,40,.58) 35%, rgba(8,14,40,.30) 70%, rgba(8,14,40,.10));
-}
-.hero-full .hero-inner {
-  position: relative; z-index: 1;
-  display: grid; place-items: center; text-align: center;
-  min-height: inherit; padding: 64px 16px; color: #fff;
+/* タップ時のハイライト除去（モバイル） */
+* { -webkit-tap-highlight-color: transparent; }
+
+/* アクセシブルなフォーカスリング */
+:focus { outline: 2px solid #111827; outline-offset: 2px; }
+@supports selector(:focus-visible) {
+  :focus:not(:focus-visible) { outline: none; }
 }
 
-/* =========================
-   Section background rhythms
-   ========================= */
-/* 薄いグラデ：読ませたい節に適用（例：診療時間/FAQ） */
-.section-alt {
-  background:
-    radial-gradient(1200px 500px at 50% -200px, rgba(29,78,216,.08), transparent 60%),
-    linear-gradient(180deg, #fff, #f8fafc 60%, #fff);
+/* Skip link（<a class="skip-link">本文へスキップ</a> を使う想定） */
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: #fff; padding: 8px 16px;
+  border: 1px solid #e5e7eb; border-radius: 8px; z-index: 100;
+  color: inherit; text-decoration: none;
+}
+.skip-link:focus { top: 0; }
+
+/* デフォルトはリンク色を継承（必要な箇所だけ className で下線付与） */
+a { color: inherit; text-decoration: none; }
+
+/* 見出し（最小限） */
+h1 { font-size: 2rem; line-height: 1.25; font-weight: 700; }
+h2 { font-size: 1.5rem; line-height: 1.30; font-weight: 700; }
+h3 { font-size: 1.25rem; line-height: 1.40; font-weight: 700; }
+
+/* テーブル（セルのボーダーはページ側で付ける方針） */
+table { width: 100%; border-collapse: collapse; }
+
+/* フォーム要素（素のCSSで共通スタイル） */
+input, textarea, select {
+  width: 100%;
+  display: block;
+  border: 1px solid #d1d5db;       /* gray-300 */
+  border-radius: 0.5rem;            /* rounded-lg */
+  padding: 0.5rem 0.75rem;          /* px-3 py-2 */
+  font: inherit; line-height: 1.5; color: inherit; background-color: #fff;
+}
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid #111827; outline-offset: 2px; border-color: #111827;
 }
 
-/* =========================
-   Utilities
-   ========================= */
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
-/* prose */
-.prose h2 { @apply text-2xl font-semibold mt-12 mb-4; }
-.prose p  { @apply leading-relaxed; }
-.prose ul { @apply list-disc pl-6 space-y-1; }
-.prose li { @apply leading-relaxed; }
-
-/* --- A11y polish --- */
-.btn:focus-visible {
-  outline: 2px solid var(--color-brand-700);
-  outline-offset: 2px;
+/* ボタン（アンカーをボタン化する場合はHTML側でクラスを付与） */
+button {
+  cursor: pointer;
+  border: 1px solid #d1d5db;        /* gray-300 */
+  border-radius: 0.5rem;            /* rounded-lg */
+  padding: 0.5rem 1rem;             /* px-4 py-2 */
+  background-color: #f3f4f6;        /* gray-100 */
+  color: inherit;
 }
-
-/* --- Micro interactions（Lean：軽めの影と移動に留める） --- */
-@media (hover:hover) {
-  .btn { transition: transform 120ms ease, box-shadow 160ms ease; }
-  .btn-primary { box-shadow: 0 1px 0 rgba(0,0,0,.05); }
-  .btn-primary:hover { box-shadow: 0 6px 16px rgba(29,78,216,.18); transform: translateY(-1px); }
-  .btn-outline:hover,
-  .btn-ghost-light:hover { transform: translateY(-1px); }
-
-  .card { transition: transform 140ms ease, box-shadow 160ms ease; }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.05); }
-
-  /* ナビ hover 下線（aria-label値に依存しない） */
-  header nav a { text-underline-offset: 4px; text-decoration-thickness: 1px; }
-  header nav a:hover { text-decoration: underline; }
-}
-.btn:active { transform: translateY(0); }
-
-/* --- Respect prefers-reduced-motion --- */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-    scroll-behavior: auto !important;
-  }
+button:hover { background-color: #e5e7eb; } /* gray-200 */
+button:disabled, input:disabled, select:disabled, textarea:disabled {
+  opacity: 0.5; cursor: not-allowed;
 }
