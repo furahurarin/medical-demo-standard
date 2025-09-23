@@ -1,30 +1,35 @@
 // src/app/legal/privacy/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE, NAP } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "プライバシーポリシー｜架空クリニック",
+  title: `プライバシーポリシー｜${SITE.name}`,
   description: "当院の個人情報の取り扱いに関する方針をご案内します。",
   alternates: { canonical: "/legal/privacy" },
 };
 
 const CLINIC = {
-  name: "架空クリニック",
-  address: "東京都千代田区丸の内1-1-1",
-  phone: "03-1234-5678",
-  email: "info@example.jp",
-  rep: "山田 太郎",
+  name: SITE.name,
+  address: NAP.address,
+  phone: NAP.telDisplay,
+  phoneLink: NAP.telLink,
+  email: "info@example.jp", // 実運用時に差し替え
+  rep: "山田 太郎",        // 実運用時に差し替え
 };
 
 export default function PrivacyPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold">プライバシーポリシー</h1>
-      <p className="mt-2 text-sm text-gray-500">最終改定日：2025-09-22（本サイトはデモです）</p>
+      <p className="mt-2 text-sm text-gray-500">
+        最終改定日：2025-09-22（本サイトはデモです）
+      </p>
 
       <section className="mt-6 space-y-4 text-gray-800 leading-relaxed">
         <p>
-          {CLINIC.name}（以下「当院」）は、患者さま・お問い合わせの皆さまの個人情報を適切に保護・管理するため、以下の方針に基づき取り扱います。
+          {CLINIC.name}
+          （以下「当院」）は、患者さま・お問い合わせの皆さまの個人情報を適切に保護・管理するため、以下の方針に基づき取り扱います。
         </p>
 
         <h2 className="text-xl font-semibold mt-8">1. 取得する情報</h2>
@@ -41,8 +46,7 @@ export default function PrivacyPage() {
 
         <h2 className="text-xl font-semibold mt-8">3. アクセス解析・Cookie</h2>
         <p>
-          当サイトでは、アクセス解析ツール（例：Umami、Google
-          Analytics 4）を用いる場合があります。これらはCookie等を利用して匿名のトラフィックデータを収集します。Cookieはブラウザ設定により無効化できます。
+          当サイトでは、アクセス解析ツール（例：Umami、Google Analytics 4）を用いる場合があります。これらはCookie等を利用して匿名のトラフィックデータを収集します。Cookieはブラウザ設定により無効化できます。
         </p>
 
         <h2 className="text-xl font-semibold mt-8">4. 第三者提供</h2>
@@ -51,9 +55,7 @@ export default function PrivacyPage() {
         </p>
 
         <h2 className="text-xl font-semibold mt-8">5. 安全管理</h2>
-        <p>
-          不正アクセス、紛失、改ざん、漏えい等を防止するため、必要かつ適切な安全管理措置を講じます。
-        </p>
+        <p>不正アクセス、紛失、改ざん、漏えい等を防止するため、必要かつ適切な安全管理措置を講じます。</p>
 
         <h2 className="text-xl font-semibold mt-8">6. 開示・訂正・削除等の請求</h2>
         <p>
@@ -71,15 +73,25 @@ export default function PrivacyPage() {
           <div>所在地：{CLINIC.address}</div>
           <div>代表者：{CLINIC.rep}</div>
           <div>
-            電話：<a href="tel:0312345678" className="underline">{CLINIC.phone}</a>（デモ表示）
+            電話：
+            <a href={`tel:${CLINIC.phoneLink}`} className="underline">
+              {CLINIC.phone}
+            </a>
+            （デモ表示）
           </div>
           <div>
-            メール：<a href="mailto:info@example.jp" className="underline">{CLINIC.email}</a>（デモ表示）
+            メール：
+            <a href={`mailto:${CLINIC.email}`} className="underline">
+              {CLINIC.email}
+            </a>
+            （デモ表示）
           </div>
         </address>
 
         <div className="mt-10">
-          <Link href="/" className="underline text-sm">トップへ戻る</Link>
+          <Link href="/" className="underline text-sm">
+            トップへ戻る
+          </Link>
         </div>
       </section>
     </main>

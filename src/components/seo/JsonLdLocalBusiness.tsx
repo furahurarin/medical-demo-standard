@@ -6,10 +6,10 @@ type Props = {
   /** サイトURL（httpsから） */
   url?: string;
 
-  /** ロゴ画像の絶対URL */
+  /** ロゴ画像（相対/絶対どちらでも可。相対は url を基に絶対化） */
   logo?: string;
 
-  /** 代表画像（1枚 or 複数） */
+  /** 代表画像（相対/絶対どちらでも可。複数可。相対は url を基に絶対化） */
   image?: string | string[];
 
   /** 代表電話番号（ハイフン可） */
@@ -29,7 +29,7 @@ type Props = {
   latitude?: number;
   longitude?: number;
 
-  /** Googleマップ等の地図URL */
+  /** Googleマップ等の地図URL（絶対URL推奨） */
   hasMap?: string;
 
   /** SNSや公式アカウントなどのURL群（LINE等もここへ） */
@@ -55,9 +55,7 @@ const DAY_MAP: Record<string, string> = {
   Su: "Sunday",
 };
 
-/**
- * "Mo,Tu,We 09:00-12:30" のような文字列配列を OpeningHoursSpecification へ変換
- */
+/** "Mo,Tu,We 09:00-12:30" のような文字列配列を OpeningHoursSpecification へ変換 */
 function toOpeningHoursSpecification(lines: string[] = []) {
   const specs: Array<Record<string, unknown>> = [];
 
@@ -66,11 +64,17 @@ function toOpeningHoursSpecification(lines: string[] = []) {
     if (!trimmed) continue;
 
     // 例: "Mo,Tu,We,Fr 09:00-12:30"
-    const m = trimmed.match(/^([A-Za-z]{2}(?:,[A-Za-z]{2})*)\s+(\d{2}:\d{2})-(\d{2}:\d{2})$/);
+    const m = trimmed.match(
+      /^([A-Za-z]{2}(?:,[A-Za-z]{2})*)\s+(\d{2}:\d{2})-(\d{2}:\d{2})$/
+    );
     if (!m) continue;
 
     const [, daysStr, opens, closes] = m;
-    const days = daysStr.split(",").map((d) => DAY_MAP[d as keyof typeof DAY_MAP]).filter(Boolean);
+    const days = daysStr
+      .split(",")
+      .map((d) => DAY_MAP[d as keyof typeof DAY_MAP])
+      .filter(Boolean);
+
     if (days.length === 0) continue;
 
     specs.push({
@@ -81,6 +85,20 @@ function toOpeningHoursSpecification(lines: string[] = []) {
     });
   }
   return specs;
+}
+
+/** 相対URL（/xxx）をサイトURLを基に絶対化。すでに絶対ならそのまま返す */
+function absolutize(urlLike?: string, siteBase?: string) {
+  if (!urlLike) return undefined;
+  if (/^https?:\/\//i.test(urlLike)) return urlLike;
+  if (!siteBase) return urlLike; // siteBase 不明ならそのまま
+  try {
+    const base = siteBase.replace(/\/+$/, "");
+    const path = urlLike.startsWith("/") ? urlLike : `/${urlLike}`;
+    return `${base}${path}`;
+  } catch {
+    return urlLike;
+  }
 }
 
 export default function JsonLdLocalBusiness({
@@ -103,6 +121,8 @@ export default function JsonLdLocalBusiness({
   priceRange,
   contactPageUrl,
 }: Props) {
+  const canon = url ? url.replace(/\/+$/, "") : undefined;
+
   // ベース
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -111,15 +131,20 @@ export default function JsonLdLocalBusiness({
   };
 
   // ID/URL
-  if (url) {
-    const canon = url.replace(/\/+$/, "");
+  if (canon) {
     data.url = canon;
     data["@id"] = `${canon}#clinic`;
   }
 
-  // ロゴ & 画像
-  if (logo) data.logo = logo;
-  if (image) data.image = Array.isArray(image) ? image : [image];
+  // ロゴ & 画像（相対→絶対化）
+  const absLogo = absolutize(logo, canon);
+  if (absLogo) data.logo = absLogo;
+
+  const images = Array.isArray(image) ? image : image ? [image] : [];
+  const absImages = images
+    .map((img) => absolutize(img, canon))
+    .filter(Boolean) as string[];
+  if (absImages.length) data.image = absImages;
 
   // 連絡先
   if (telephone) data.telephone = telephone;
@@ -136,13 +161,13 @@ export default function JsonLdLocalBusiness({
     };
   }
 
-  // 地図/位置
+  // 地図/位置（hasMap は絶対推奨）
   if (hasMap) data.hasMap = hasMap;
   if (typeof latitude === "number" && typeof longitude === "number") {
     data.geo = { "@type": "GeoCoordinates", latitude, longitude };
   }
 
-  // 営業時間（文字列はそのまま openingHours、同時に構造化も生成）
+  // 営業時間（文字列はそのまま openingHours、構造化も付与）
   if (openingHours.length) {
     data.openingHours = openingHours;
     const specs = toOpeningHoursSpecification(openingHours);
@@ -154,7 +179,9 @@ export default function JsonLdLocalBusiness({
 
   // medicalSpecialty
   if (medicalSpecialty) {
-    data.medicalSpecialty = Array.isArray(medicalSpecialty) ? medicalSpecialty : [medicalSpecialty];
+    data.medicalSpecialty = Array.isArray(medicalSpecialty)
+      ? medicalSpecialty
+      : [medicalSpecialty];
   }
 
   // priceRange（任意）
@@ -162,10 +189,11 @@ export default function JsonLdLocalBusiness({
 
   // 予約/問い合わせ導線（任意）
   if (contactPageUrl) {
+    const absContact = absolutize(contactPageUrl, canon);
     data.potentialAction = [
       {
         "@type": "ContactAction",
-        target: contactPageUrl,
+        target: absContact ?? contactPageUrl,
         name: "お問い合わせ",
       },
     ];
@@ -174,7 +202,6 @@ export default function JsonLdLocalBusiness({
   return (
     <script
       type="application/ld+json"
-      // JSON.stringify 第二引数/第三引数は不要（最小化）
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );

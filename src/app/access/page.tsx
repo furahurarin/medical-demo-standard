@@ -1,24 +1,22 @@
 // src/app/access/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE, NAP, LINKS, MEDIA } from "@/config/site";
+import JsonLdLocalBusiness from "@/components/seo/JsonLdLocalBusiness";
 
 export const metadata: Metadata = {
-  title: "アクセス・診療時間｜架空クリニック",
+  title: `アクセス・診療時間｜${SITE.name}`,
   description:
-    "架空クリニックへのアクセス（住所・地図）と診療時間のご案内。最寄駅からの徒歩ルート、電話番号のご案内も掲載しています。",
+    `${SITE.name}へのアクセス（住所・地図）と診療時間のご案内。最寄駅からの徒歩ルート、電話番号のご案内も掲載しています。`,
   alternates: { canonical: "/access" },
 };
 
-// NAP（layout.tsx と同一にしておく）
-const CLINIC_NAME = "架空クリニック";
-const ADDRESS = "東京都千代田区丸の内1-1-1";
-const TEL_DISPLAY = "03-1234-5678";
-const TEL_LINK = "0312345678";
-
-// Googleマップ用（必要に応じて後で差し替え）
-const MAP_QUERY = encodeURIComponent(ADDRESS);
-const GMAPS_EMBED = `https://www.google.com/maps?q=${MAP_QUERY}&output=embed`;
-const GMAPS_LINK = `https://www.google.com/maps?q=${MAP_QUERY}`;
+// GoogleマップURL（NAP.mapUrl を基準に埋め込み用URLを生成）
+const GMAPS_LINK = NAP.mapUrl;
+const GMAPS_EMBED =
+  GMAPS_LINK.includes("output=embed")
+    ? GMAPS_LINK
+    : `${GMAPS_LINK}${GMAPS_LINK.includes("?") ? "&" : "?"}output=embed`;
 
 export default function AccessPage() {
   return (
@@ -27,7 +25,7 @@ export default function AccessPage() {
       <header className="hero-soft-bg rounded-2xl ring-1 ring-gray-100 px-6 py-10 md:px-8 md:py-12 space-y-3">
         <h1 className="text-3xl md:text-4xl font-bold motion-fadein">アクセス・診療時間</h1>
         <p className="text-gray-700 motion-fadein">
-          {CLINIC_NAME} の所在地と診療時間のご案内です。ご不明点は{" "}
+          {SITE.name} の所在地と診療時間のご案内です。ご不明点は{" "}
           <Link href="/contact" className="underline hover:no-underline">
             お問い合わせ
           </Link>{" "}
@@ -42,11 +40,11 @@ export default function AccessPage() {
           {/* 住所ブロック */}
           <div className="card p-5 space-y-3 motion-fadein">
             <div className="text-sm text-gray-700">
-              住所：{ADDRESS}
+              住所：{NAP.address}
               <br />
               電話：{" "}
-              <a href={`tel:${TEL_LINK}`} className="underline hover:no-underline">
-                {TEL_DISPLAY}
+              <a href={`tel:${NAP.telLink}`} className="underline hover:no-underline">
+                {NAP.telDisplay}
               </a>
             </div>
             <div className="text-sm text-gray-700">
@@ -67,7 +65,7 @@ export default function AccessPage() {
           {/* 地図埋め込み */}
           <div className="photo-wrap overflow-hidden border motion-fadein">
             <iframe
-              title={`${CLINIC_NAME} の地図`}
+              title={`${SITE.name} の地図`}
               src={GMAPS_EMBED}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -139,6 +137,25 @@ export default function AccessPage() {
           </Link>
         </div>
       </section>
+
+      {/* JSON-LD（hasMap/sameAs/image をここで明示的に付与） */}
+      <JsonLdLocalBusiness
+        name={SITE.name}
+        url={SITE.url}
+        telephone={NAP.telDisplay}
+        streetAddress={NAP.address}
+        addressCountry="JP"
+        hasMap={GMAPS_LINK}
+        sameAs={LINKS.sameAs}
+        image={MEDIA.ogp}
+        openingHours={[
+          "Mo,Tu,We,Fr 09:00-12:30",
+          "Mo,Tu,We,Fr 14:30-18:00",
+          "Th 09:00-12:30",
+          "Sa 09:00-12:30",
+        ]}
+        contactPageUrl="/contact"
+      />
     </main>
   );
 }

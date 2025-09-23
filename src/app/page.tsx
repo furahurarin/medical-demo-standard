@@ -1,18 +1,15 @@
 // src/app/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
+import { SITE, NAP, MEDIA } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "架空クリニック｜地域のかかりつけ医",
+  title: `${SITE.name}｜地域のかかりつけ医`,
   description:
-    "架空クリニックは、地域の皆さまに寄り添う診療を提供します。診療案内、医師紹介、設備、アクセス情報やお問い合わせはこちら。",
+    `${SITE.name}は、地域の皆さまに寄り添う診療を提供します。診療案内、医師紹介、設備、アクセス情報やお問い合わせはこちら。`,
   alternates: { canonical: "/" },
 };
-
-// NAP（layout.tsxと合わせる）
-const CLINIC_NAME = "架空クリニック";
-const TEL_DISPLAY = "03-1234-5678";
-const TEL_LINK = "0312345678";
 
 export default function HomePage() {
   return (
@@ -26,15 +23,17 @@ export default function HomePage() {
               安心の医療を。
             </h1>
             <p className="text-gray-700 md:text-lg">
-              {CLINIC_NAME} は、一般外来から慢性疾患のフォロー、予防接種・健診まで、
+              {SITE.name} は、一般外来から慢性疾患のフォロー、予防接種・健診まで、
               日常の不調から継続的なケアまで対応します。
             </p>
             <div className="flex flex-wrap gap-3">
               <a
-                href={`tel:${TEL_LINK}`}
+                href={`tel:${NAP.telLink}`}
                 className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+                data-umami-event="tel_click"
+                data-umami-event-location="hero"
               >
-                電話する（{TEL_DISPLAY}）
+                電話する（{NAP.telDisplay}）
               </a>
               <Link href="/contact" className="btn-primary">
                 フォームで相談
@@ -42,9 +41,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* 画像差替え想定：/public/images/clinic-hero.jpg 等 */}
-          <div className="photo-wrap aspect-[16/9] bg-gray-50 border grid place-items-center text-gray-500 motion-fadein">
-            <span className="text-sm">院内イメージ（差替え可）</span>
+          {/* LCP最適化：next/image + priority */}
+          <div className="relative aspect-[16/9] overflow-hidden rounded-xl border motion-fadein">
+            <Image
+              src={MEDIA.ogp ?? "/ogp.jpg"}
+              alt={`${SITE.name} の院内イメージ`}
+              fill
+              priority
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
           </div>
         </div>
       </section>
@@ -105,7 +111,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 最新のお知らせ（まずは最小。次手順でCMS化） */}
+      {/* 最新のお知らせ（まずは最小） */}
       <section className="space-y-3">
         <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">最新のお知らせ</h2>
         <p className="text-sm text-gray-700 motion-fadein">
@@ -122,10 +128,12 @@ export default function HomePage() {
         <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">受診・ご相談はこちら</h2>
         <div className="flex flex-wrap gap-3 motion-fadein">
           <a
-            href={`tel:${TEL_LINK}`}
+            href={`tel:${NAP.telLink}`}
             className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+            data-umami-event="tel_click"
+            data-umami-event-location="cta_bottom"
           >
-            電話する（{TEL_DISPLAY}）
+            電話する（{NAP.telDisplay}）
           </a>
           <Link href="/contact" className="btn-primary">
             フォームで相談

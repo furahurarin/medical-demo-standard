@@ -7,7 +7,8 @@ export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "お知らせ一覧｜架空クリニック",
-  description: "架空クリニックのお知らせ一覧。休診情報やご案内、最新情報を掲載します。",
+  description:
+    "架空クリニックのお知らせ一覧。休診情報やご案内、最新情報を掲載します。",
   alternates: { canonical: "/news" },
 };
 
