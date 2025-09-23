@@ -1,26 +1,14 @@
-// src/app/sitemap.ts
 import type { MetadataRoute } from "next";
-import { NEWS } from "@/lib/news";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-  const staticPaths: MetadataRoute.Sitemap = [
-    { url: `${base}/`, lastModified: new Date() },
-    { url: `${base}/services`, lastModified: new Date() },
-    { url: `${base}/doctor`, lastModified: new Date() },
-    { url: `${base}/facilities`, lastModified: new Date() },
-    { url: `${base}/news`, lastModified: new Date() },
-    { url: `${base}/access-hours`, lastModified: new Date() },
-    { url: `${base}/contact`, lastModified: new Date() },
-    { url: `${base}/legal/privacy`, lastModified: new Date() }, // ★追加
-    { url: `${base}/legal/tokusho`, lastModified: new Date() }, // ★追加
-  ];
-
-  const newsPaths: MetadataRoute.Sitemap = NEWS.map((n) => ({
-    url: `${base}/news/${n.slug}`,
-    lastModified: new Date(n.date),
+  const now = new Date();
+  const urls = ["/", "/services", "/staff", "/facility", "/access", "/news"];
+  return urls.map((path) => ({
+    url: `${SITE_URL}${path}`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: path === "/" ? 1 : 0.7,
   }));
-
-  return [...staticPaths, ...newsPaths];
 }

@@ -1,46 +1,47 @@
 // src/app/news/[slug]/page.tsx
 import type { Metadata } from "next";
-import Link from "next/link";
-import { getNewsBySlug } from "@/lib/news";
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { latestNews } from "@/lib/news";
 
-// Next.js 15: params is Promise
-type Params = Promise<{ slug: string }>;
-
+// 動的メタデータ（対象が無い場合は404タイトル）
 export async function generateMetadata(
-  { params }: { params: Params }
+  { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await params;
-  const item = getNewsBySlug(slug);
-  if (!item) return { title: "お知らせ｜架空クリニック" };
-
+  const item = latestNews.find((n) => n.slug === slug);
+  if (!item) return { title: "お知らせ | ページが見つかりません" };
   return {
     title: `${item.title}｜お知らせ｜架空クリニック`,
-    description: item.body.slice(0, 80),
+    description: `${new Date(item.date).toLocaleDateString("ja-JP")}のお知らせです。`,
     alternates: { canonical: `/news/${item.slug}` },
   };
 }
 
-export default async function NewsDetail(
-  { params }: { params: Params }
+export default async function NewsDetailPage(
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const item = getNewsBySlug(slug);
+  const item = latestNews.find((n) => n.slug === slug);
   if (!item) return notFound();
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex items-center gap-2">
-        <span className="mr-2 inline-block rounded-full border px-2 py-0.5 text-xs text-gray-700 bg-gray-50">
-          {item.tag}
-        </span>
-        <p className="text-sm text-gray-500">{item.date}</p>
+    <main className="mx-auto max-w-3xl px-4 py-10">
+      <div className="text-sm text-gray-500">
+        {new Date(item.date).toLocaleDateString("ja-JP")}
       </div>
-      <h1 className="mt-1 text-3xl font-bold">{item.title}</h1>
-      <div className="mt-6 text-gray-800 leading-relaxed">{item.body}</div>
+      <h1 className="mt-1 text-2xl font-bold">{item.title}</h1>
 
-      <div className="mt-8">
-        <Link href="/news" className="inline-block text-sm underline hover:no-underline">
+      {item.body ? (
+        <p className="mt-4 text-gray-700 leading-7">{item.body}</p>
+      ) : (
+        <p className="mt-4 text-gray-700 leading-7">
+          詳細本文は準備中です。最新情報は一覧ページをご確認ください。
+        </p>
+      )}
+
+      <div className="mt-10">
+        <Link href="/news" className="text-brand-700 hover:underline">
           お知らせ一覧へ戻る
         </Link>
       </div>

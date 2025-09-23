@@ -1,41 +1,28 @@
 // src/lib/news.ts
-export type News = {
-  slug: string;
+export type NewsItem = {
+  slug: string;     // 日付や任意のスラッグ
   title: string;
-  date: string; // YYYY-MM-DD
-  body: string;
-  tag: "休診" | "予防接種" | "お知らせ";
+  date: string;     // ISO (YYYY-MM-DD)
+  body?: string;    // 詳細（ダミー可）
 };
 
-export const NEWS: News[] = [
+export const latestNews: NewsItem[] = [
   {
-    slug: "flu-vaccine",
-    title: "インフルエンザ予防接種の予約開始",
-    date: "2025-09-01",
-    body: "在庫に限りがあります。事前にお電話でご確認ください。",
-    tag: "予防接種",
+    slug: "2025-09-15",
+    title: "インフルエンザ予防接種のご案内",
+    date: "2025-09-15",
+    body: "今季のインフルエンザ予防接種を開始しました。詳細・ご予約はお問い合わせください。"
   },
   {
-    slug: "fever-call",
-    title: "発熱・かぜ症状の方へ",
-    date: "2025-09-10",
-    body: "来院前にお電話でご相談ください。",
-    tag: "お知らせ",
+    slug: "2025-08-30",
+    title: "9/21(土) 臨時休診のお知らせ",
+    date: "2025-08-30",
+    body: "院内研修のため、9/21(土)は臨時休診とさせていただきます。ご不便をおかけします。"
   },
   {
-    slug: "2025-obon",
-    title: "【お盆】8/13–15の診療について",
-    date: "2025-07-25",
-    body: "8/13–15は午前のみ診療、午後休診となります。",
-    tag: "休診",
+    slug: "2025-08-10",
+    title: "お盆期間の診療時間について",
+    date: "2025-08-10",
+    body: "お盆期間中は一部診療時間が変更となります。来院前にあらかじめご確認ください。"
   },
 ];
-
-export function getNews(): News[] {
-  // 日付降順
-  return [...NEWS].sort((a, b) => (a.date < b.date ? 1 : -1));
-}
-
-export function getNewsBySlug(slug: string): News | null {
-  return NEWS.find((n) => n.slug === slug) ?? null;
-}
