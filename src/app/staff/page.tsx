@@ -1,123 +1,207 @@
 // src/app/staff/page.tsx
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "医師・スタッフ紹介｜架空クリニック",
+  title: "医師紹介｜架空クリニック",
   description:
-    "医師の経歴・専門分野、スタッフ体制をご紹介します。安心して受診いただけるよう、丁寧な診療とわかりやすい説明を心がけています。",
+    "院長のご挨拶、専門分野、資格・所属、診療方針、対応領域、初診の流れをご案内します。写真は院長のみ掲載しています。",
   alternates: { canonical: "/staff" },
+};
+
+type Career = { period: string; text: string };
+
+const DIRECTOR = {
+  name: "山田 太郎",
+  role: "院長",
+  dept: "内科",
+  intro:
+    "当院は院長が初診からフォローまで一貫して担当する小規模クリニックです。過不足のない検査と丁寧な説明を重視し、生活背景に沿った無理のない治療計画をご提案します。都心の通いやすさと、顔の見える診療体験の両立を目指しています。",
+  specialties: [
+    "総合内科",
+    "生活習慣病（高血圧・脂質異常症・糖尿病）",
+    "かぜ・胃腸炎などの一般内科",
+  ],
+  credentials: ["日本内科学会 総合内科専門医", "日本医師会 認定産業医"],
+  careers: [
+    { period: "2010年", text: "国立◯◯大学 医学部卒業" },
+    { period: "2010–2015年", text: "◯◯総合病院 内科 勤務（急性期・総合診療を担当）" },
+    { period: "2016–2023年", text: "都内クリニック 副院長" },
+    { period: "2024年–現在", text: "架空クリニック 院長" },
+  ] as Career[],
+  photoSrc: "/images/staff/director.webp",
+  photoAlt: "院長 山田のポートレート",
 };
 
 export default function StaffPage() {
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 space-y-12">
-      {/* ページヘッダー */}
-      <header className="hero-soft-bg rounded-2xl ring-1 ring-gray-100 px-6 py-10 md:px-8 md:py-12 space-y-3">
-        <h1 className="text-3xl md:text-4xl font-bold motion-fadein">医師・スタッフ紹介</h1>
-        <p className="text-gray-700 motion-fadein">
-          地域のかかりつけとして、必要な検査・治療をていねいにご提案します。専門性とチームワークで、
-          安心して受診できる体制を整えています。
-        </p>
-      </header>
+    <main className="min-h-screen">
+      {/* 見出し（ページ内リンクは一切表示しません） */}
+      <section className="border-b border-gray-100 bg-white">
+        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
+          <h1 className="text-2xl font-bold sm:text-3xl">医師紹介</h1>
+          <p className="mt-3 text-gray-600">
+            小規模体制により、院長が継続してお顔と状態を把握したうえで診療します。
+          </p>
+        </div>
+      </section>
 
-      {/* 医師紹介（院長フィーチャー） */}
-      <section className="space-y-6">
-        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">医師紹介</h2>
-
-        {/* 院長 */}
-        <article className="card p-6 space-y-4 motion-fadein">
-          <div className="grid gap-6 md:grid-cols-[1fr,1.5fr] items-start">
-            {/* 写真プレースホルダー（差し替え可） */}
-            <div className="photo-wrap aspect-[4/3] bg-gray-50 border grid place-items-center text-gray-500">
-              <span className="text-sm">院長写真（/public/images/director.jpg 等に差替え）</span>
-            </div>
-
-            <div className="space-y-4">
-              <div className="space-y-1">
-                <h3 className="text-xl font-semibold">院長　山田 太郎（やまだ たろう）</h3>
-                <p className="text-sm text-gray-700">
-                  専門：一般内科／慢性疾患の外来フォロー、生活習慣病の管理
-                </p>
+      {/* 院長（唯一の写真） */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto grid max-w-6xl grid-cols-1 items-start gap-8 px-4 sm:grid-cols-12 sm:px-6">
+          {/* 写真：4:5 推奨 */}
+          <div className="sm:col-span-5">
+            <div className="overflow-hidden rounded-2xl border border-gray-100 bg-gray-50">
+              <div className="relative w-full" style={{ aspectRatio: "4 / 5" }}>
+                <Image
+                  src={DIRECTOR.photoSrc}
+                  alt={DIRECTOR.photoAlt}
+                  fill
+                  sizes="(min-width: 1024px) 420px, 50vw"
+                  className="object-cover"
+                  priority
+                />
               </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <h4 className="font-semibold">経歴</h4>
-                  <ul className="list-disc pl-6 text-sm text-gray-700 space-y-1">
-                    <li>〇〇大学 医学部 卒業</li>
-                    <li>〇〇総合病院 内科 勤務</li>
-                    <li>架空クリニック 院長 就任</li>
-                  </ul>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold">資格・所属</h4>
-                  <ul className="list-disc pl-6 text-sm text-gray-700 space-y-1">
-                    <li>日本内科学会 認定内科医</li>
-                    <li>日本糖尿病学会 会員</li>
-                    <li>日本医師会 認定産業医</li>
-                  </ul>
-                </div>
-              </div>
-
-              <p className="text-sm text-gray-700">
-                受診に迷われた方にも、症状や生活背景を伺いながら最適な検査・治療を一緒に考えます。まずはお気軽にご相談ください。
-              </p>
             </div>
           </div>
-        </article>
 
-        {/* 複数医師（必要に応じて複製） */}
-        <div className="grid gap-6 sm:grid-cols-2">
-          <article className="card p-5 space-y-2 motion-fadein">
-            <h3 className="font-semibold">非常勤医師 A</h3>
-            <p className="text-sm text-gray-700">専門：〇〇　／ 担当日：毎週〇曜日</p>
-          </article>
-          <article className="card p-5 space-y-2 motion-fadein">
-            <h3 className="font-semibold">非常勤医師 B</h3>
-            <p className="text-sm text-gray-700">専門：〇〇　／ 担当日：第〇・〇週〇曜日</p>
-          </article>
+          {/* テキスト */}
+          <div className="sm:col-span-7">
+            <p className="text-sm text-gray-500">
+              {DIRECTOR.role}・{DIRECTOR.dept}
+            </p>
+            <h2 className="mt-1 text-2xl font-bold sm:text-3xl">{DIRECTOR.name}</h2>
+            <p className="mt-4 leading-7 text-gray-700">{DIRECTOR.intro}</p>
+
+            {/* 専門・資格 */}
+            <div className="mt-6 grid gap-6 sm:grid-cols-2">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">専門</h3>
+                <ul className="mt-2 list-disc pl-5 text-sm text-gray-700">
+                  {DIRECTOR.specialties.map((s, i) => (
+                    <li key={`sp-${i}`}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">資格・所属</h3>
+                <ul className="mt-2 list-disc pl-5 text-sm text-gray-700">
+                  {DIRECTOR.credentials.map((c, i) => (
+                    <li key={`cr-${i}`}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* 経歴 */}
+            <div className="mt-6">
+              <h3 className="text-sm font-semibold text-gray-900">経歴</h3>
+              <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                {DIRECTOR.careers.map((c, i) => (
+                  <li key={`cv-${i}`}>
+                    <span className="inline-block w-28 text-gray-500">{c.period}</span>
+                    <span>{c.text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* スタッフ紹介 */}
-      <section className="space-y-6">
-        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">スタッフ紹介</h2>
-        <div className="grid gap-6 sm:grid-cols-3">
-          <article className="card p-5 space-y-1 motion-fadein">
-            <h3 className="font-semibold">看護師</h3>
-            <p className="text-sm text-gray-700">
-              診療介助・採血・検査案内を担当。安全でスムーズな受診を支えます。
-            </p>
-          </article>
-          <article className="card p-5 space-y-1 motion-fadein">
-            <h3 className="font-semibold">医療事務</h3>
-            <p className="text-sm text-gray-700">
-              受付・会計・レセプト業務を担当。受診前後の不明点はお気軽にご相談ください。
-            </p>
-          </article>
-          <article className="card p-5 space-y-1 motion-fadein">
-            <h3 className="font-semibold">検査スタッフ</h3>
-            <p className="text-sm text-gray-700">
-              心電図・採血など基本検査を担当。検査前の注意点をご案内します。
-            </p>
-          </article>
+      {/* 診療方針（画像なし） */}
+      <section className="bg-gray-50 py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-xl font-bold sm:text-2xl">診療方針</h2>
+        </div>
+        <div className="mx-auto mt-4 max-w-6xl px-4 sm:px-6">
+          <ul className="grid gap-3 text-gray-700 sm:grid-cols-2">
+            <li className="rounded-xl bg-white p-4 shadow-sm">
+              <p className="font-medium">一貫診療</p>
+              <p className="mt-1 text-sm">初診からフォローまで院長が継続して担当します。</p>
+            </li>
+            <li className="rounded-xl bg-white p-4 shadow-sm">
+              <p className="font-medium">必要十分な検査</p>
+              <p className="mt-1 text-sm">過不足のない検査選択で、時間と費用の負担を抑えます。</p>
+            </li>
+            <li className="rounded-xl bg-white p-4 shadow-sm">
+              <p className="font-medium">わかりやすい説明</p>
+              <p className="mt-1 text-sm">検査結果・治療方針を噛み砕いてお伝えします。</p>
+            </li>
+            <li className="rounded-xl bg-white p-4 shadow-sm">
+              <p className="font-medium">生活に沿う治療</p>
+              <p className="mt-1 text-sm">仕事や家庭の事情に合わせ、無理のない計画をご提案。</p>
+            </li>
+          </ul>
         </div>
       </section>
 
-      {/* 関連導線（回遊） */}
-      <section className="space-y-4">
-        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">関連ページ</h2>
-        <div className="flex flex-wrap gap-3 motion-fadein">
-          <Link href="/services" className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50">
-            診療案内を見る
-          </Link>
-          <Link href="/facility" className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50">
-            設備・院内紹介を確認する
-          </Link>
-          <Link href="/contact" className="btn-primary">
-            お問い合わせ（フォーム）
-          </Link>
+      {/* 対応領域（例） */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-xl font-bold sm:text-2xl">対応領域</h2>
+          <p className="mt-3 text-gray-600">
+            下記は一例です。重症感が強い場合は受診前にお電話でご相談ください。
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[
+              "生活習慣病（高血圧・脂質異常症・糖尿病）",
+              "かぜ・インフルエンザ様症状",
+              "腹痛・下痢・便秘などの消化器症状",
+              "頭痛・めまい・倦怠感",
+              "花粉症・蕁麻疹などのアレルギー症状",
+            ].map((tag, i) => (
+              <span
+                key={`tg-${i}`}
+                className="rounded-full border border-gray-200 px-3 py-1 text-xs text-gray-700"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          <p className="mt-4 text-sm text-gray-600">
+            ※専門的治療や入院が必要と判断した場合は、近隣の医療機関へ適切にご紹介します。
+          </p>
+        </div>
+      </section>
+
+      {/* 初診の流れ */}
+      <section className="bg-gray-50 py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <h2 className="text-xl font-bold sm:text-2xl">初診の流れ</h2>
+          <ol className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              { title: "ご来院・受付", text: "健康保険証・各種医療証、お薬手帳をご持参ください。" },
+              { title: "問診", text: "症状の経過やご不安を丁寧に伺い、必要に応じて検査をご提案します。" },
+              { title: "診察・検査", text: "院長が診察を行い、過不足のない検査を選択します。" },
+              { title: "結果説明・お会計", text: "結果と治療方針をご説明し、次回の受診目安をご案内します。" },
+            ].map((step, i) => (
+              <li key={`st-${i}`} className="rounded-xl bg-white p-4 shadow-sm">
+                <p className="text-sm font-semibold">
+                  {i + 1}. {step.title}
+                </p>
+                <p className="mt-1 text-sm text-gray-700">{step.text}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 採用情報（将来的な体制拡充に備えて） */}
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="rounded-2xl bg-gradient-to-br from-brand-100 to-white p-6 ring-1 ring-inset ring-brand-50 sm:p-8">
+            <h2 className="text-xl font-bold sm:text-2xl">採用情報</h2>
+            <p className="mt-2 text-gray-700">
+              体制拡充に向け、看護師・医療事務の採用を段階的に行う予定です。募集状況は採用ページでご案内します。
+            </p>
+            <div className="mt-4">
+              <Link href="/recruit" className="btn btn-primary">
+                採用ページへ
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </main>

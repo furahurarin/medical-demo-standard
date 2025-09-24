@@ -7,6 +7,7 @@ import ClientRoot from "@/components/ClientRoot";
 import JsonLdLocalBusiness from "@/components/seo/JsonLdLocalBusiness";
 import { SITE, NAP, LINKS, MEDIA } from "@/config/site";
 import Umami from "@/components/analytics/Umami";
+import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -38,61 +39,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           本文へスキップ
         </a>
 
-        {/* Header */}
-        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100">
-          <div className="mx-auto max-w-6xl px-4 py-3 flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="font-semibold text-lg hover:opacity-80">
-                {SITE.name}
-              </Link>
-            </div>
-
-            <nav aria-label="グローバル" className="ml-auto">
-              <ul className="flex items-center gap-5 text-sm">
-                <li><Link href="/services" className="hover:underline">診療案内</Link></li>
-                <li><Link href="/staff" className="hover:underline">医師・スタッフ</Link></li>
-                <li><Link href="/facility" className="hover:underline">設備紹介</Link></li>
-                <li><Link href="/access" className="hover:underline">アクセス</Link></li>
-                <li>
-                  <a
-                    href={LINKS.lineUrl}
-                    target="_blank"
-                    rel="noopener"
-                    className="hover:underline"
-                    data-umami-event="line_click"
-                    data-umami-event-location="header"
-                  >
-                    LINEで予約
-                  </a>
-                </li>
-                <li>
-                  <Link href="/contact" className="btn-primary">
-                    お問い合わせ
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-
-            {/* TEL（控えめ表示。SPではfooterでも案内するため冗長にならない程度に） */}
-            <div className="hidden sm:block text-sm text-gray-700">
-              <a
-                href={`tel:${NAP.telLink}`}
-                className="hover:underline"
-                data-umami-event="tel_click"
-                data-umami-event-location="header"
-              >
-                {NAP.telDisplay}
-              </a>
-            </div>
-          </div>
-        </header>
+        {/* Header（SPはメニュー、MD+は横並び） */}
+        <SiteHeader />
 
         {/* Main with client-side transition */}
         <main id="main">
           <ClientRoot>{children}</ClientRoot>
         </main>
 
-        {/* Footer */}
+        {/* Footer（既存配色・書式を踏襲） */}
         <footer className="mt-16 border-t border-gray-100">
           <div className="mx-auto max-w-6xl px-4 py-10 grid gap-6 sm:grid-cols-3">
             <div>
@@ -147,7 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </footer>
 
-        {/* ▼ 構造化データ（ローカルビジネス/クリニック） */}
+        {/* 構造化データ */}
         <JsonLdLocalBusiness
           name={SITE.name}
           url={SITE.url}

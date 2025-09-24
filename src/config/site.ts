@@ -19,4 +19,10 @@ export const LINKS = {
 export const MEDIA = {
   ogp: "/ogp.jpg",
   logo: "/icon-512x512.png", // ある場合
+
+  /** Hero用の画像（/public 配下に配置） */
+  hero: "/images/home/hero-01.webp",
+
+  /** Hero画像の代替テキスト（アクセシビリティ/SEO用） */
+  heroAlt: "医院外観のHeroイメージ",
 };

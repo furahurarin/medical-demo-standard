@@ -1,6 +1,7 @@
 // src/app/services/page.tsx
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: "診療案内｜架空クリニック",
@@ -10,6 +11,34 @@ export const metadata: Metadata = {
 };
 
 export default function ServicesPage() {
+  // 画像は /public/images/services/ 配下に配置してください
+  const services = [
+    {
+      title: "一般外来",
+      desc: "かぜ症状、胃腸炎、花粉症、生活習慣病の相談など幅広く対応します。",
+      src: "/images/services/general-01.webp",
+      alt: "一般外来のイメージ（診察のようす）",
+    },
+    {
+      title: "慢性疾患フォロー",
+      desc: "高血圧、脂質異常症、糖尿病などの継続治療・定期検査に対応します。",
+      src: "/images/services/chronic-01.webp",
+      alt: "慢性疾患フォローのイメージ（血圧測定など）",
+    },
+    {
+      title: "予防接種・健診",
+      desc: "公費・任意の各種ワクチン、一般健診や就業時健診などに対応します。",
+      src: "/images/services/vaccine-01.webp",
+      alt: "予防接種・健診のイメージ（注射器・診察室）",
+    },
+    {
+      title: "各種検査",
+      desc: "採血・心電図などの基本検査を院内で実施。必要時は連携医療機関へ紹介します。",
+      src: "/images/services/exam-01.webp",
+      alt: "各種検査のイメージ（心電図・採血）",
+    },
+  ];
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 space-y-12">
       {/* ページヘッダー */}
@@ -25,35 +54,33 @@ export default function ServicesPage() {
         </p>
       </header>
 
-      {/* 診療科目 / 主な対応症状 */}
+      {/* 診療科目 / 主な対応症状（画像つきカード） */}
       <section className="space-y-6">
-        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">診療科目・主な対応症状</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">
+          診療科目・主な対応症状
+        </h2>
+
         <div className="grid gap-6 sm:grid-cols-2">
-          <article className="card p-5 motion-fadein">
-            <h3 className="font-semibold">一般外来</h3>
-            <p className="text-sm text-gray-700 mt-1">
-              かぜ症状、胃腸炎、花粉症、生活習慣病の相談など幅広く対応します。
-            </p>
-          </article>
-          <article className="card p-5 motion-fadein">
-            <h3 className="font-semibold">慢性疾患フォロー</h3>
-            <p className="text-sm text-gray-700 mt-1">
-              高血圧、脂質異常症、糖尿病などの継続治療・定期検査に対応します。
-            </p>
-          </article>
-          <article className="card p-5 motion-fadein">
-            <h3 className="font-semibold">予防接種・健診</h3>
-            <p className="text-sm text-gray-700 mt-1">
-              公費・任意の各種ワクチン、一般健診や就業時健診などに対応します。
-            </p>
-          </article>
-          <article className="card p-5 motion-fadein">
-            <h3 className="font-semibold">各種検査</h3>
-            <p className="text-sm text-gray-700 mt-1">
-              採血・心電図などの基本検査を院内で実施。必要時は連携医療機関へ紹介します。
-            </p>
-          </article>
+          {services.map((s) => (
+            <article key={s.title} className="card p-0 overflow-hidden motion-fadein">
+              <div className="relative aspect-[16/9]">
+                <Image
+                  src={s.src}
+                  alt={s.alt}
+                  fill
+                  className="object-cover"
+                  sizes="(min-width:1024px) 50vw, 100vw"
+                  priority={s.title === "一般外来"} // 1枚だけ優先読込
+                />
+              </div>
+              <div className="p-5">
+                <h3 className="font-semibold">{s.title}</h3>
+                <p className="text-sm text-gray-700 mt-1">{s.desc}</p>
+              </div>
+            </article>
+          ))}
         </div>
+
         {/* 関連導線 */}
         <p className="text-sm text-gray-700 motion-fadein">
           院内の設備については{" "}
@@ -66,7 +93,9 @@ export default function ServicesPage() {
 
       {/* 初めて受診される方へ（受診の流れ） */}
       <section className="space-y-4">
-        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">初めて受診される方へ（受診の流れ）</h2>
+        <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">
+          初めて受診される方へ（受診の流れ）
+        </h2>
         <div className="card p-5 motion-fadein">
           <ol className="list-decimal pl-6 space-y-2 text-gray-700">
             <li>
@@ -129,10 +158,16 @@ export default function ServicesPage() {
       <section className="space-y-4">
         <h2 className="text-2xl md:text-3xl font-semibold motion-fadein">関連ページ</h2>
         <div className="flex flex-wrap gap-3 motion-fadein">
-          <Link href="/access" className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50">
+          <Link
+            href="/access"
+            className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+          >
             アクセス・診療時間を確認する
           </Link>
-          <Link href="/staff" className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50">
+          <Link
+            href="/staff"
+            className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+          >
             医師・スタッフを見る
           </Link>
           <Link href="/contact" className="btn-primary">

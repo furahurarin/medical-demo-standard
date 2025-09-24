@@ -1,5 +1,0 @@
-<!-- src/app/icon.svg -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#1d4ed8"></rect>
-  <path d="M288 112h-64v96h-96v64h96v96h64v-96h96v-64h-96z" fill="#fff"></path>
-</svg>

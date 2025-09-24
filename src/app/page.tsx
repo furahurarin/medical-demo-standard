@@ -12,45 +12,51 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
+  const HERO_IMAGE = MEDIA?.hero ?? MEDIA?.ogp ?? "/images/hero/hero-01.webp";
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 space-y-16">
-      {/* Hero */}
-      <section className="hero-soft-bg rounded-2xl ring-1 ring-gray-100 px-6 py-10 md:px-10 md:py-16">
-        <div className="grid gap-8 lg:grid-cols-2 items-center">
-          <div className="space-y-5 motion-fadein">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              地域のかかりつけとして、<br className="hidden sm:block" />
-              安心の医療を。
-            </h1>
-            <p className="text-gray-700 md:text-lg">
-              {SITE.name} は、一般外来から慢性疾患のフォロー、予防接種・健診まで、
-              日常の不調から継続的なケアまで対応します。
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <a
-                href={`tel:${NAP.telLink}`}
-                className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
-                data-umami-event="tel_click"
-                data-umami-event-location="hero"
-              >
-                電話する（{NAP.telDisplay}）
-              </a>
-              <Link href="/contact" className="btn-primary">
-                フォームで相談
-              </Link>
-            </div>
-          </div>
+      {/* Hero：背景画像を強めに表示（opacity削除／オーバーレイ弱め） */}
+      <section className="relative overflow-hidden rounded-2xl ring-1 ring-gray-100">
+        <Image
+          src={HERO_IMAGE}
+          alt={`${SITE.name} の院内イメージ`}
+          fill
+          priority
+          sizes="(min-width: 1024px) 1200px, 100vw"
+          className="object-cover" // ← opacity を外して写真の発色をキープ
+        />
+        {/* ほんのり明るさを足す程度の薄いグラデ（テキスト可読性補助） */}
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-white/20 via-white/10 to-transparent md:via-white/15" />
 
-          {/* LCP最適化：next/image + priority */}
-          <div className="relative aspect-[16/9] overflow-hidden rounded-xl border motion-fadein">
-            <Image
-              src={MEDIA.ogp ?? "/ogp.jpg"}
-              alt={`${SITE.name} の院内イメージ`}
-              fill
-              priority
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
-            />
+        {/* コンテンツ */}
+        <div className="relative px-6 py-10 md:px-10 md:py-16">
+          <div className="grid gap-8 lg:grid-cols-2 items-center">
+            {/* モバイルではテキスト背後に半透明の白パネルで可読性確保、md以上で解除 */}
+            <div className="space-y-5 motion-fadein rounded-xl bg-white/70 backdrop-blur-[2px] p-4 md:bg-transparent md:backdrop-blur-0 md:p-0">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+                地域のかかりつけとして、<br className="hidden sm:block" />
+                安心の医療を。
+              </h1>
+              <p className="text-gray-700 md:text-lg">
+                {SITE.name} は、一般外来から慢性疾患のフォロー、予防接種・健診まで、
+                日常の不調から継続的なケアまで対応します。
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={`tel:${NAP.telLink}`}
+                  className="inline-flex items-center rounded-lg px-4 py-2 border hover:bg-gray-50"
+                  data-umami-event="tel_click"
+                  data-umami-event-location="hero"
+                >
+                  電話する（{NAP.telDisplay}）
+                </a>
+                <Link href="/contact" className="btn-primary">
+                  フォームで相談
+                </Link>
+              </div>
+            </div>
+            <div className="h-0 lg:h-[1px]" aria-hidden="true" />
           </div>
         </div>
       </section>
