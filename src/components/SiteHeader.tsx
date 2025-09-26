@@ -2,201 +2,265 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { SITE, NAP } from "@/config/site";
 
-type NavItem = { label: string; href: string; prefetch?: boolean };
+type NavItem = { href: string; label: string };
 
 const NAV: NavItem[] = [
-  { label: "診療案内", href: "/services" },
-  { label: "医師紹介", href: "/staff" },
-  { label: "設備紹介", href: "/facility" },
-  { label: "お知らせ", href: "/news" },
-  { label: "アクセス", href: "/access" },
-  { label: "お問い合わせ", href: "/contact" },
+  { href: "/", label: "トップ" },
+  { href: "/services", label: "診療案内" },
+  { href: "/staff", label: "医師・スタッフ" },
+  { href: "/facility", label: "院内設備" },
+  { href: "/access", label: "アクセス" },
+  { href: "/contact", label: "お問い合わせ" },
 ];
 
+// NAPのtel系を安全に文字列化
+function normalizeTelHref(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  const digits = raw.replace(/[^\d+]/g, "");
+  return digits ? `tel:${digits}` : "";
+}
+
 export default function SiteHeader() {
-  const [open, setOpen] = useState<boolean>(false);
-  const panelRef = useRef<HTMLDivElement | null>(null);
-  const firstFocusableRef = useRef<HTMLButtonElement | null>(null);
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const close = () => setOpen(false);
-  const toggle = () => setOpen((v) => !v);
+  const panelRef = useRef<HTMLElement | null>(null);
+  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
+  const lastActiveRef = useRef<Element | null>(null);
 
-  // Close on ESC
+  // tel: を作成（any禁止対応）
+  const telHref = useMemo(() => {
+    const nap = NAP as { telLink?: string; telDisplay?: string } | undefined;
+    return normalizeTelHref(nap?.telLink ?? nap?.telDisplay);
+  }, []);
+
+  // ルート遷移で閉じる
+  useEffect(() => setOpen(false), [pathname]);
+
+  // スクロール影
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent | globalThis.KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    window.addEventListener("keydown", onKey as (ev: globalThis.KeyboardEvent) => void);
-    return () => window.removeEventListener("keydown", onKey as (ev: globalThis.KeyboardEvent) => void);
-  }, [open]);
+    const onScroll = () => setScrolled((window.scrollY || 0) > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-  // Focus the first element when opening
+  // 開閉時のDOM更新（LPのScript相当、式ではなく通常の文で）
   useEffect(() => {
+    const html = document.documentElement;
+    const overlay = document.getElementById("menu-overlay");
+    const panel = document.getElementById("menu-panel");
+
+    html.setAttribute("data-menu-open", open ? "true" : "false");
+    if (!overlay || !panel) return;
+
     if (open) {
-      firstFocusableRef.current?.focus();
+      overlay.classList.remove("pointer-events-none");
+      overlay.classList.add("opacity-100");
+      panel.classList.remove("translate-x-full");
+      panel.classList.add("translate-x-0");
+      document.body.style.overflow = "hidden";
+      lastActiveRef.current = document.activeElement || null;
+      closeBtnRef.current?.focus();
+    } else {
+      overlay.classList.remove("opacity-100");
+      overlay.classList.add("pointer-events-none");
+      panel.classList.add("translate-x-full");
+      panel.classList.remove("translate-x-0");
+      document.body.style.overflow = "";
+      (lastActiveRef.current as HTMLElement | null)?.focus?.();
     }
   }, [open]);
 
-  // Click on overlay to close
-  const onOverlayClick = (e: MouseEvent<HTMLDivElement>) => {
-    // クリック対象がパネル自身の外側（overlay）なら閉じる
-    if (e.target === e.currentTarget) close();
-  };
+  // Escで閉じる
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
-  // Trap focus in panel (very lightweight)
-  const onKeyDownWithin = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== "Tab") return;
-    const container = panelRef.current;
-    if (!container) return;
+  // フォーカストラップ（addEventListenerのany回避：onkeydownに代入）
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!open || !panel) return;
 
-    const focusables = container.querySelectorAll<HTMLElement>(
-      'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
-    );
-    if (focusables.length === 0) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusables = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter(
+        (el) => !el.hasAttribute("disabled") && el.getAttribute("aria-hidden") !== "true"
+      );
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement as HTMLElement | null;
+      if (e.shiftKey && active === first) {
+        last.focus();
+        e.preventDefault();
+      } else if (!e.shiftKey && active === last) {
+        first.focus();
+        e.preventDefault();
+      }
+    };
 
-    const first = focusables[0];
-    const last = focusables[focusables.length - 1];
+    const prevHandler = panel.onkeydown;
+    panel.onkeydown = onKeyDown;
+    return () => {
+      panel.onkeydown = prevHandler;
+    };
+  }, [open]);
 
-    if (e.shiftKey && document.activeElement === first) {
-      e.preventDefault();
-      last.focus();
-    } else if (!e.shiftKey && document.activeElement === last) {
-      e.preventDefault();
-      first.focus();
+  // reduced motion
+  useEffect(() => {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        const overlay = document.getElementById("menu-overlay");
+        const panel = document.getElementById("menu-panel");
+        if (overlay) overlay.style.transition = "none";
+        if (panel) panel.style.transition = "none";
+      }
+    } catch {
+      // no-op
     }
-  };
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-100">
-      <div className="mx-auto max-w-6xl px-4 h-16 flex items-center justify-between">
-        {/* Brand */}
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            {/* simple logo placeholder */}
-            <span aria-hidden className="inline-block h-6 w-6 rounded bg-blue-600"></span>
-            <span className="font-semibold tracking-tight">架空クリニック</span>
-          </Link>
+    <>
+      {/* ===== ヘッダー（LPと同クラス） ===== */}
+      <header
+        id="site-header"
+        className="sticky top-0 z-50 border-b bg-white transition-shadow"
+        aria-label="サイト全体のヘッダー"
+        style={{ boxShadow: scrolled ? "0 6px 20px -12px rgba(0,0,0,0.22)" : "none" }}
+      >
+        {/* アクセントライン */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-blue-100 via-blue-400/40 to-blue-100"
+        />
+        <div className="mx-auto max-w-6xl px-4">
+          <div className="flex h-16 items-center justify-between">
+            <Link href="/" className="inline-flex items-center" aria-label="トップへ">
+              <span className="text-[15px] font-semibold tracking-tight">{SITE.name}</span>
+            </Link>
+
+            {/* ハンバーガー（PC/モバイル共通） */}
+            <button
+              id="menu-button"
+              type="button"
+              aria-label="メニューを開閉"
+              aria-haspopup="dialog"
+              aria-controls="menu-panel"
+              aria-expanded={open}
+              className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+              onClick={() => setOpen((v) => !v)}
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+                <path
+                  d="M4 6h16M4 12h16M4 18h16"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="text-[15px] font-medium">メニュー</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ===== オーバーレイ（LPと同じ） ===== */}
+      <div
+        id="menu-overlay"
+        aria-hidden="true"
+        className={`fixed inset-0 z-[90] bg-black/30 transition-opacity ${
+          open ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setOpen(false)}
+      />
+
+      {/* ===== 右スライドパネル（LPと同DOM/クラス） ===== */}
+      <aside
+        id="menu-panel"
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="menu-title"
+        className={`fixed inset-y-0 right-0 z-[100] w-80 max-w-[88%] translate-x-full bg-white shadow-xl transition-transform will-change-transform ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b p-4">
+          <span id="menu-title" className="font-semibold tracking-tight">
+            メニュー
+          </span>
+          <button
+            ref={closeBtnRef}
+            id="menu-close"
+            type="button"
+            className="rounded-md border p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+            aria-label="メニューを閉じる"
+            onClick={() => setOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
+              <path
+                d="M6 18L18 6M6 6l12 12"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
         </div>
 
-        {/* Desktop nav */}
-        <nav className="hidden md:block">
-          <ul className="flex items-center gap-6 text-sm">
+        <nav className="p-2">
+          <ul className="flex flex-col">
             {NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  prefetch={item.prefetch}
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                  className="block rounded-lg px-4 py-3 text-[15px] text-gray-800 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
+                  onClick={() => setOpen(false)}
                 >
                   {item.label}
                 </Link>
               </li>
             ))}
           </ul>
-        </nav>
 
-        {/* Desktop CTA */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link
-            href="/contact"
-            className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-800 hover:bg-blue-100"
-          >
-            フォームで相談
-          </Link>
-          <a
-            href="tel:03-1234-5678"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            03-1234-5678 に電話
-          </a>
-        </div>
-
-        {/* Mobile hamburger */}
-        <div className="md:hidden">
-          <button
-            type="button"
-            aria-label="メニューを開く"
-            aria-haspopup="dialog"
-            aria-expanded={open}
-            onClick={toggle}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-50"
-          >
-            {/* icon */}
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
-              <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile overlay + panel */}
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="モバイルメニュー"
-          className="md:hidden fixed inset-0 z-50 bg-black/40"
-          onClick={onOverlayClick}
-        >
-          <div
-            ref={panelRef}
-            className="ml-auto h-full w-80 max-w-[85%] bg-white shadow-xl animate-in slide-in-from-right duration-200"
-            onKeyDown={onKeyDownWithin}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-gray-100">
-              <span className="font-semibold">メニュー</span>
-              <button
-                ref={firstFocusableRef}
-                type="button"
-                aria-label="メニューを閉じる"
-                onClick={close}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-gray-50"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5">
-                  <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-
-            <nav className="p-4">
-              <ul className="space-y-1">
-                {NAV.map((item) => (
-                  <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      prefetch={item.prefetch}
-                      className="block rounded-md px-3 py-2 text-gray-700 hover:bg-gray-50"
-                      onClick={close}
-                    >
-                      {item.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <div className="mt-2 border-t border-gray-100 p-4 space-y-2">
-              <Link
-                href="/contact"
-                className="block rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-800 text-center hover:bg-blue-100"
-                onClick={close}
-              >
-                フォームで相談
-              </Link>
+          {/* CTA：色合いはプロジェクト既定に統一（outline / btn-primary） */}
+          <div className="p-4">
+            {telHref && (
               <a
-                href="tel:03-1234-5678"
-                className="block rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white text-center hover:bg-blue-700"
-                onClick={close}
+                href={telHref}
+                data-umami-event="lp_phone_click_header_mobile"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-gray-50"
+                onClick={() => setOpen(false)}
               >
-                03-1234-5678 に電話
+                電話する
               </a>
-            </div>
+            )}
+            <Link
+              href="/contact"
+              data-umami-event="lp_email_click_header_mobile"
+              className="btn-primary w-full text-sm mt-3"
+              onClick={() => setOpen(false)}
+            >
+              フォームで相談
+            </Link>
           </div>
-        </div>
-      )}
-    </header>
+        </nav>
+      </aside>
+    </>
   );
 }
